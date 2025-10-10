@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import "./Home.css";
-
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -20,11 +19,8 @@ function Home() {
     reportFile: null,
   });
 
-  useEffect(() => {
-    fetchProjects();
-  }, [filterType, searchTerm]);
-
-  const fetchProjects = async () => {
+  // ✅ Memoize fetchProjects to keep stable reference
+  const fetchProjects = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/projects`, {
         params: { type: filterType, search: searchTerm },
@@ -34,7 +30,12 @@ function Home() {
       console.error('Error fetching projects:', error);
       alert('Failed to fetch projects');
     }
-  };
+  }, [filterType, searchTerm]);
+
+  // ✅ Effect now safely depends on fetchProjects
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
