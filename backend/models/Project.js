@@ -7,7 +7,11 @@ const projectSchema = new mongoose.Schema({
   techStack: { type: [String], required: true },
   studentName: { type: String, required: true },
   email: { type: String, required: true },
-  reportFile: { type: String, required: true }, // Stores the filename
+  rollNo: { type: String, required: true },
+  branch: { type: String, required: true }, 
+  academicYear: { type: String, required: true }, 
+  githubLink: { type: String, default: '' },
+  reportFile: { type: String, required: true },
   uploadDate: { type: Date, default: Date.now }
 }, { collection: "projects" });
 

@@ -3,7 +3,6 @@ import axios from "axios";
 import "./LoginPage.css";
 import { useNavigate } from "react-router-dom";
 
-
 function LoginPage() {
   const [roll, setRoll] = useState("");
   const [password, setPassword] = useState("");
@@ -11,21 +10,22 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage("");
-    
 
-    
     try {
       const res = await axios.post(`${process.env.REACT_APP_API_URL}/login`, {
         roll,
         password
       });
       setMessage(res.data.message);
+      
+      // Store student roll number in localStorage
+      localStorage.setItem("studentRollNo", roll);
       localStorage.setItem("token", res.data.token);
+      
       navigate("/home");
 
     } catch (err) {
@@ -37,6 +37,11 @@ function LoginPage() {
 
   return (
     <div className="login-container">
+      <div className="login-title">
+        <h1>ProjectVault</h1>
+        <p>Students Project Repository</p>
+      </div>
+      
       <div className="login-box">
         <div className="login-header">
           <h2>Student Login</h2>

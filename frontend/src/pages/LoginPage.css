@@ -1,12 +1,22 @@
 /* LoginPage.css */
-.login-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.login-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.login-title h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.login-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+  margin-top: -50px; /* Add this to move it up a bit */
 }
 
 .login-box {
@@ -19,6 +29,18 @@
   max-width: 400px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column; /* Add this */
+  align-items: center;
+  justify-content: center; /* This will center everything vertically */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 
 .login-box:hover {
   transform: translateY(-5px);

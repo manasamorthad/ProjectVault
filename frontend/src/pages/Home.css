@@ -293,6 +293,127 @@ body {
   font-size: 1.2rem;
 }
 
+/* Add to existing Home.css */
+.readonly-field {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.project-meta {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+}
+
+.branch-tag, .year-tag {
+  background: #e3f2fd;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  color: #1976d2;
+}
+
+.rollno {
+  font-size: 0.9em;
+  color: #666;
+  margin: 2px 0;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filters select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+
+/* Add to Home.css */
+.auto-detected {
+  font-size: 0.8em;
+  color: #28a745;
+  margin-top: 5px;
+  font-weight: bold;
+}
+
+.project-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%; /* Add this */
+}
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Add this */
+  gap: 5px;
+  color: #333;
+  text-decoration: none;
+  padding: 12px; /* Change from 8px 12px to 12px */
+  border: 1px solid #ddd;
+  border-radius: 8px; /* Change from 4px to 8px to match download button */
+  transition: all 0.3s ease;
+  background: white;
+  font-weight: 600; /* Add this to match download button */
+  flex: 1; /* Add this to make it take equal width */
+  text-align: center; /* Add this */
+}
+
+.github-link:hover {
+  background-color: #f5f5f5;
+  text-decoration: none;
+  border-color: #999;
+  transform: translateY(-2px); /* Add hover effect to match download button */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add hover effect to match download button */
+}
+
+.student-info-display {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border-left: 4px solid #667eea;
+  border: 2px solid #e9ecef;
+}
+
+.student-info-display h4 {
+  color: #667eea;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.info-value {
+  color: #333;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
   .header h1 {
     font-size: 2rem;

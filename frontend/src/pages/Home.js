@@ -4,11 +4,35 @@ import "./Home.css";
 
 const API_URL = 'http://localhost:5000/api';
 
+// Programme codes mapping
+const PROGRAMME_CODES = {
+  '732': 'B.E- CIVIL ENGINEERING',
+  '733': 'B.E- COMPUTER SCIENCE AND ENGG.',
+  '734': 'B.E- ELECTRICAL & ELECTRONICS ENGG.',
+  '735': 'B.E- ELECTRONICS & COMMUNICATION ENGG.',
+  '736': 'B.E- MECHANICAL ENGINEERING',
+  '737': 'B.E- INFORMATION TECHNOLOGY',
+  '738': 'B.E- PRODUCTION ENGINEERING',
+  '802': 'B.TECH- CHEMICAL ENGINEERING',
+  '805': 'B.TECH- BIO TECHNOLOGY',
+  '771': 'B.E- ARTIFICIAL INTELLIGENCE AND DATA SCIENCE',
+  '748': 'B.E- COMPUTER SCIENCE AND ENGINEERING (ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING)',
+  '749': 'B.E- COMPUTER SCIENCE AND ENGINEERING (INTERNET OF THINGS AND CYBER SECURITY INCLUDING BLOCK CHAIN TECHNOLOGY)',
+  '729': 'B.E- ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING'
+};
+
+const ALL_BRANCHES = Object.values(PROGRAMME_CODES);
+
 function Home() {
   const [projects, setProjects] = useState([]);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [filterType, setFilterType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterBranch, setFilterBranch] = useState('all');
+  const [filterAcademicYear, setFilterAcademicYear] = useState('all');
+  const [sortAcademicYear, setSortAcademicYear] = useState('none');
+  const [loggedInStudent, setLoggedInStudent] = useState(null);
+  
   const [formData, setFormData] = useState({
     projectName: '',
     projectType: 'mini',
@@ -16,21 +40,70 @@ function Home() {
     techStack: '',
     studentName: '',
     email: '',
+    githubLink: '',
     reportFile: null,
   });
+
+  // Extract branch from roll number
+  const extractBranchFromRollNo = (rollNo) => {
+    if (rollNo.length >= 12) {
+      const branchCode = rollNo.substring(6, 9);
+      return PROGRAMME_CODES[branchCode] || 'Unknown Branch';
+    }
+    return '';
+  };
+
+  // Extract academic year from roll number (format: 2023-27)
+  const extractAcademicYearFromRollNo = (rollNo) => {
+    if (rollNo.length >= 12) {
+      const yearCode = rollNo.substring(4, 6);
+      const baseYear = 2000 + parseInt(yearCode);
+      return `${baseYear}-${(baseYear + 4).toString().slice(-2)}`;
+    }
+    return '';
+  };
+
+  // Get logged-in student data
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const studentRollNo = localStorage.getItem("studentRollNo");
+    
+    if (token && studentRollNo) {
+      const branch = extractBranchFromRollNo(studentRollNo);
+      const academicYear = extractAcademicYearFromRollNo(studentRollNo);
+      setLoggedInStudent({
+        rollNo: studentRollNo,
+        branch: branch,
+        academicYear: academicYear
+      });
+    }
+  }, []);
+
+  // Get academic years that actually have projects
+  const getAvailableAcademicYears = () => {
+    const yearsWithProjects = [...new Set(projects.map(p => p.academicYear).filter(year => year && year !== ''))];
+    return ['all', ...yearsWithProjects];
+  };
 
   // ✅ Memoize fetchProjects to keep stable reference
   const fetchProjects = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/projects`, {
-        params: { type: filterType, search: searchTerm },
+        params: { 
+          type: filterType !== 'all' ? filterType : undefined,
+          search: searchTerm || undefined,
+          branch: filterBranch !== 'all' ? filterBranch : undefined,
+          academicYear: filterAcademicYear !== 'all' ? filterAcademicYear : undefined,
+          sort: sortAcademicYear !== 'none' ? sortAcademicYear : undefined
+        },
       });
+      
       setProjects(response.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
       alert('Failed to fetch projects');
     }
-  }, [filterType, searchTerm]);
+  }, [filterType, searchTerm, filterBranch, filterAcademicYear, sortAcademicYear]);
 
   // ✅ Effect now safely depends on fetchProjects
   useEffect(() => {
@@ -49,6 +122,11 @@ function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!loggedInStudent) {
+      alert('Please login first');
+      return;
+    }
+
     const data = new FormData();
     data.append('projectName', formData.projectName);
     data.append('projectType', formData.projectType);
@@ -56,6 +134,10 @@ function Home() {
     data.append('techStack', JSON.stringify(formData.techStack.split(',').map(t => t.trim())));
     data.append('studentName', formData.studentName);
     data.append('email', formData.email);
+    data.append('rollNo', loggedInStudent.rollNo);
+    data.append('branch', loggedInStudent.branch);
+    data.append('academicYear', loggedInStudent.academicYear);
+    data.append('githubLink', formData.githubLink);
     data.append('reportFile', formData.reportFile);
 
     try {
@@ -71,6 +153,7 @@ function Home() {
         techStack: '',
         studentName: '',
         email: '',
+        githubLink: '',
         reportFile: null,
       });
       fetchProjects();
@@ -82,7 +165,7 @@ function Home() {
 
   const handleDownload = async (filename, projectName) => {
     try {
-      const response = await axios.get(`${API_URL}/download/${filename}`, {
+      const response = await axios.get(`${API_URL}/projects/download/${filename}`, {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -97,6 +180,8 @@ function Home() {
       alert('Failed to download report');
     }
   };
+
+  const availableAcademicYears = getAvailableAcademicYears();
 
   return (
     <div className="App">
@@ -118,6 +203,30 @@ function Home() {
               <option value="major">Major Projects</option>
             </select>
 
+            <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)}>
+              <option value="all">All Branches</option>
+              {ALL_BRANCHES.map((branch, index) => (
+                <option key={index} value={branch}>{branch}</option>
+              ))}
+            </select>
+
+            <select value={filterAcademicYear} onChange={(e) => setFilterAcademicYear(e.target.value)}>
+              <option value="all">All Academic Years</option>
+              {availableAcademicYears
+                .filter(year => year !== 'all')
+                .sort((a, b) => b.localeCompare(a))
+                .map((year, index) => (
+                  <option key={index} value={year}>{year}</option>
+                ))
+              }
+            </select>
+
+            <select value={sortAcademicYear} onChange={(e) => setSortAcademicYear(e.target.value)}>
+              <option value="none">Sort by Year</option>
+              <option value="asc">Academic Year (Oldest First)</option>
+              <option value="desc">Academic Year (Newest First)</option>
+            </select>
+
             <input
               type="text"
               placeholder="Search projects..."
@@ -132,6 +241,26 @@ function Home() {
           <div className="upload-form">
             <h2>Upload New Project</h2>
             <form onSubmit={handleSubmit}>
+              
+              {/* Student Info Display */}
+              {loggedInStudent && (
+                <div className="student-info-display">
+                  <h4>Student Information (Auto-detected)</h4>
+                  <div className="info-row">
+                    <span className="info-label">Roll No:</span>
+                    <span className="info-value">{loggedInStudent.rollNo}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Branch:</span>
+                    <span className="info-value">{loggedInStudent.branch}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Academic Year:</span>
+                    <span className="info-value">{loggedInStudent.academicYear}</span>
+                  </div>
+                </div>
+              )}
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Project Name *</label>
@@ -206,6 +335,17 @@ function Home() {
               </div>
 
               <div className="form-group">
+                <label>GitHub Link (Optional)</label>
+                <input
+                  type="url"
+                  name="githubLink"
+                  value={formData.githubLink}
+                  onChange={handleInputChange}
+                  placeholder="https://github.com/username/repository"
+                />
+              </div>
+
+              <div className="form-group">
                 <label>Upload Report (PDF) *</label>
                 <input
                   type="file"
@@ -240,28 +380,45 @@ function Home() {
                 <p className="description">{project.description}</p>
 
                 <div className="tech-stack">
-                  {project.techStack.map((tech, index) => (
+                  {project.techStack && project.techStack.map((tech, index) => (
                     <span key={index} className="tech-tag">
                       {tech}
                     </span>
                   ))}
                 </div>
 
+                <div className="project-meta">
+                  {project.branch && (
+                    <span className="branch-tag">🏛️ {project.branch}</span>
+                  )}
+                  {project.academicYear && (
+                    <span className="year-tag">🎓 {project.academicYear}</span>
+                  )}
+                </div>
+
                 <div className="project-footer">
                   <div className="student-info">
                     <p><strong>👤 {project.studentName}</strong></p>
                     <p className="email">✉ {project.email}</p>
+                    {project.rollNo && <p className="rollno">🔢 {project.rollNo}</p>}
                     <p className="date">
                       📅 {new Date(project.uploadDate).toLocaleDateString()}
                     </p>
                   </div>
-
-                  <button
-                    className="download-btn"
-                    onClick={() => handleDownload(project.reportFile, project.projectName)}
-                  >
-                    📥 Download Report
-                  </button>
+                  
+                  <div className="project-actions">
+                    {project.githubLink && (
+                      <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="github-link">
+                        🔗 GitHub
+                      </a>
+                    )}
+                    <button
+                      className="download-btn"
+                      onClick={() => handleDownload(project.reportFile, project.projectName)}
+                    >
+                      📥 Download Report
+                    </button>
+                  </div>
                 </div>
               </div>
             ))

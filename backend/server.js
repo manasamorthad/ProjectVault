@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'; // To handle __dirname in ES modules
 import loginRoutes from "./routes/login.js";
 import projectRoutes from "./routes/projects.js"; // Import project routes
 
+
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,7 +28,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // API Routes
 app.use("/api", loginRoutes);
-app.use("/api", projectRoutes); // Use project routes
+app.use("/api/projects", projectRoutes);// Use project routes
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
