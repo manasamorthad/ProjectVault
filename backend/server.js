@@ -2,14 +2,13 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import path from "path"; // Import path module
-import { fileURLToPath } from 'url'; // To handle __dirname in ES modules
+import path from "path";
+import { fileURLToPath } from 'url';
 
 import loginRoutes from "./routes/login.js";
-import projectRoutes from "./routes/projects.js"; // Import project routes
+import projectRoutes from "./routes/projects.js";
+import facultyRoutes from "./routes/faculty.js"; // Import faculty routes
 
-
-// ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -19,7 +18,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 mongoose.connect(process.env.MONGO_URI)
@@ -28,8 +26,9 @@ mongoose.connect(process.env.MONGO_URI)
 
 // API Routes
 app.use("/api", loginRoutes);
-app.use("/api/projects", projectRoutes);// Use project routes
-
+app.use("/api/faculty", facultyRoutes); // Use faculty routes
+app.use("/api/projects", projectRoutes);
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });
+

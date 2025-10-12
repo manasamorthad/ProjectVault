@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./LoginPage.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function LoginPage() {
   const [roll, setRoll] = useState("");
@@ -10,26 +10,38 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage("");
 
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/login`, {
-        roll,
-        password
-      });
-      setMessage(res.data.message);
-      
-      // Store student roll number in localStorage
-      localStorage.setItem("studentRollNo", roll);
-      localStorage.setItem("token", res.data.token);
-      
-      navigate("/home");
+      const res = await axios.post(`${API_URL}/login`, { roll, password });
 
+      // Safely get response values
+      const token = res.data?.token;
+      const studentRollNo = res.data?.studentRollNo || roll;
+      const isAccessGranted = res.data?.isAccessGranted ?? false;
+
+      if (!token) {
+        throw new Error("No token received from server");
+      }
+
+      // Store in localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("studentRollNo", studentRollNo);
+      localStorage.setItem("isAccessGranted", isAccessGranted);
+
+      navigate("/home");
     } catch (err) {
-      setMessage(err.response?.data?.message || "Login failed");
+      console.error("Login error:", err);
+      setMessage(
+        err.response?.data?.message ||
+        err.message ||
+        "Login failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -41,15 +53,14 @@ function LoginPage() {
         <h1>ProjectVault</h1>
         <p>Students Project Repository</p>
       </div>
-      
+
       <div className="login-box">
         <div className="login-header">
           <h2>Student Login</h2>
-          <p>Welcome back! Please sign in to your account</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="login-form">
-          <div className={`form-group ${roll ? 'floating' : ''}`}>
+          <div className={`form-group ${roll ? "floating" : ""}`}>
             <input
               type="text"
               className="form-input"
@@ -60,8 +71,8 @@ function LoginPage() {
             />
             <label className="form-label">Roll Number</label>
           </div>
-          
-          <div className={`form-group ${password ? 'floating' : ''}`}>
+
+          <div className={`form-group ${password ? "floating" : ""}`}>
             <input
               type="password"
               className="form-input"
@@ -72,21 +83,21 @@ function LoginPage() {
             />
             <label className="form-label">Password</label>
           </div>
-          
-          <button 
-            type="submit" 
-            className={`login-button ${isLoading ? 'loading' : ''}`}
+
+          <button
+            type="submit"
+            className={`login-button ${isLoading ? "loading" : ""}`}
             disabled={isLoading}
           >
-            {isLoading ? '' : 'Login'}
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
-        
-        {message && (
-          <div className={`message ${message.includes('failed') ? 'error' : 'success'}`}>
-            {message}
-          </div>
-        )}
+
+        {message && <div className="message error">{message}</div>}
+
+        <div className="faculty-link-container">
+          <Link to="/faculty-login">Login as Faculty &rarr;</Link>
+        </div>
       </div>
     </div>
   );

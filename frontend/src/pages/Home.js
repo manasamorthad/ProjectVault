@@ -32,7 +32,8 @@ function Home() {
   const [filterAcademicYear, setFilterAcademicYear] = useState('all');
   const [sortAcademicYear, setSortAcademicYear] = useState('none');
   const [loggedInStudent, setLoggedInStudent] = useState(null);
-  
+  const [hasAccess, setHasAccess] = useState(true);
+
   const [formData, setFormData] = useState({
     projectName: '',
     projectType: 'mini',
@@ -50,7 +51,7 @@ function Home() {
       const branchCode = rollNo.substring(6, 9);
       return PROGRAMME_CODES[branchCode] || 'Unknown Branch';
     }
-    return '';
+    return 'Unknown Branch';
   };
 
   // Extract academic year from roll number (format: 2023-27)
@@ -60,24 +61,44 @@ function Home() {
       const baseYear = 2000 + parseInt(yearCode);
       return `${baseYear}-${(baseYear + 4).toString().slice(-2)}`;
     }
-    return '';
+    return 'Unknown';
   };
 
-  // Get logged-in student data
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const studentRollNo = localStorage.getItem("studentRollNo");
-    
-    if (token && studentRollNo) {
-      const branch = extractBranchFromRollNo(studentRollNo);
-      const academicYear = extractAcademicYearFromRollNo(studentRollNo);
-      setLoggedInStudent({
-        rollNo: studentRollNo,
-        branch: branch,
-        academicYear: academicYear
+useEffect(() => {
+  const studentRollNo = localStorage.getItem("studentRollNo");
+
+  if (!studentRollNo) {
+    // Default to a non-dummy state if no one is logged in
+    setLoggedInStudent(null);
+    setHasAccess(true); // Or false, depending on desired default behavior
+    return;
+  }
+
+  const branch = extractBranchFromRollNo(studentRollNo);
+  const academicYear = extractAcademicYearFromRollNo(studentRollNo);
+  setLoggedInStudent({
+    rollNo: studentRollNo,
+    branch,
+    academicYear,
+  });
+
+  // Corrected Logic:
+  // Check if the logged-in user is the dummy student
+  if (studentRollNo === '160123737141') {
+    axios.get(`${API_URL}/faculty/dummy-student/status`)
+      .then((res) => {
+        setHasAccess(res.data.isAccessGranted);
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch access status:", err.message);
+        setHasAccess(false); // Default to no access on error
       });
-    }
-  }, []);
+  } else {
+    // Any other student has access by default
+    setHasAccess(true);
+  }
+}, []);
+
 
   // Get academic years that actually have projects
   const getAvailableAcademicYears = () => {
@@ -85,7 +106,7 @@ function Home() {
     return ['all', ...yearsWithProjects];
   };
 
-  // ✅ Memoize fetchProjects to keep stable reference
+  // Fetch projects from API
   const fetchProjects = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/projects`, {
@@ -105,7 +126,6 @@ function Home() {
     }
   }, [filterType, searchTerm, filterBranch, filterAcademicYear, sortAcademicYear]);
 
-  // ✅ Effect now safely depends on fetchProjects
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
@@ -183,8 +203,14 @@ function Home() {
 
   const availableAcademicYears = getAvailableAcademicYears();
 
-  return (
-    <div className="App">
+return (
+  <div>
+    {!hasAccess && (
+      <div className="access-overlay">
+        <p>Access Revoked by Faculty</p>
+      </div>
+    )}
+    <div className={`App ${!hasAccess ? 'blurred' : ''}`}>
       <header className="header">
         <h1>📚 Student Projects Repository</h1>
         <p>Share and explore student projects</p>
@@ -237,30 +263,28 @@ function Home() {
           </div>
         </div>
 
-        {showUploadForm && (
+        {showUploadForm && loggedInStudent && (
           <div className="upload-form">
             <h2>Upload New Project</h2>
-            <form onSubmit={handleSubmit}>
-              
-              {/* Student Info Display */}
-              {loggedInStudent && (
-                <div className="student-info-display">
-                  <h4>Student Information (Auto-detected)</h4>
-                  <div className="info-row">
-                    <span className="info-label">Roll No:</span>
-                    <span className="info-value">{loggedInStudent.rollNo}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="info-label">Branch:</span>
-                    <span className="info-value">{loggedInStudent.branch}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="info-label">Academic Year:</span>
-                    <span className="info-value">{loggedInStudent.academicYear}</span>
-                  </div>
-                </div>
-              )}
 
+            {/* Student Info Display */}
+            <div className="student-info-display">
+              <h4>Student Information (Auto-detected)</h4>
+              <div className="info-row">
+                <span className="info-label">Roll No:</span>
+                <span className="info-value">{loggedInStudent.rollNo}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Branch:</span>
+                <span className="info-value">{loggedInStudent.branch}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Academic Year:</span>
+                <span className="info-value">{loggedInStudent.academicYear}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
                   <label>Project Name *</label>
@@ -425,6 +449,7 @@ function Home() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
