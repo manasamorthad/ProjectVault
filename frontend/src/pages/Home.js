@@ -16,12 +16,48 @@ const PROGRAMME_CODES = {
   '802': 'B.TECH- CHEMICAL ENGINEERING',
   '805': 'B.TECH- BIO TECHNOLOGY',
   '771': 'B.E- ARTIFICIAL INTELLIGENCE AND DATA SCIENCE',
-  '748': 'B.E- COMPUTER SCIENCE AND ENGINEERING (ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING)',
-  '749': 'B.E- COMPUTER SCIENCE AND ENGINEERING (INTERNET OF THINGS AND CYBER SECURITY INCLUDING BLOCK CHAIN TECHNOLOGY)',
+  '749': 'B.E- INTERNET OF THINGS AND CYBER SECURITY',
   '729': 'B.E- ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING'
 };
 
-const ALL_BRANCHES = Object.values(PROGRAMME_CODES);
+// Short form branch names for filtering
+const BRANCH_SHORT_FORMS = {
+  'B.E- CIVIL ENGINEERING': 'CIVIL',
+  'B.E- COMPUTER SCIENCE AND ENGG.': 'CSE',
+  'B.E- ELECTRICAL & ELECTRONICS ENGG.': 'EEE',
+  'B.E- ELECTRONICS & COMMUNICATION ENGG.': 'ECE',
+  'B.E- MECHANICAL ENGINEERING': 'MECH',
+  'B.E- INFORMATION TECHNOLOGY': 'IT',
+  'B.E- PRODUCTION ENGINEERING': 'PROD',
+  'B.TECH- CHEMICAL ENGINEERING': 'CHEM',
+  'B.TECH- BIO TECHNOLOGY': 'BIO-TECH',
+  'B.E- ARTIFICIAL INTELLIGENCE AND DATA SCIENCE': 'AIDS',
+  'B.E- INTERNET OF THINGS AND CYBER SECURITY': 'IOT-CS',
+  'B.E- ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING': 'AIML'
+};
+
+// Domain options
+const DOMAIN_OPTIONS = [
+  'Full Stack',
+  'MERN Stack',
+  'MEAN Stack',
+  'Machine Learning',
+  'Artificial Intelligence',
+  'Data Science',
+  'Internet of Things',
+  'Cyber Security',
+  'Cloud Computing',
+  'Mobile Development',
+  'Web Development',
+  'Blockchain',
+  'DevOps',
+  'Data Analytics',
+  'Computer Vision',
+  'Natural Language Processing',
+  'Other'
+];
+
+const ALL_BRANCHES = Object.values(BRANCH_SHORT_FORMS);
 
 function Home() {
   const [projects, setProjects] = useState([]);
@@ -29,6 +65,7 @@ function Home() {
   const [filterType, setFilterType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBranch, setFilterBranch] = useState('all');
+  const [filterDomain, setFilterDomain] = useState('all');
   const [filterAcademicYear, setFilterAcademicYear] = useState('all');
   const [sortAcademicYear, setSortAcademicYear] = useState('none');
   const [loggedInStudent, setLoggedInStudent] = useState(null);
@@ -38,7 +75,7 @@ function Home() {
     projectName: '',
     projectType: 'mini',
     description: '',
-    techStack: '',
+    domain: '',
     studentName: '',
     email: '',
     githubLink: '',
@@ -64,41 +101,36 @@ function Home() {
     return 'Unknown';
   };
 
-useEffect(() => {
-  const studentRollNo = localStorage.getItem("studentRollNo");
+  useEffect(() => {
+    const studentRollNo = localStorage.getItem("studentRollNo");
 
-  if (!studentRollNo) {
-    // Default to a non-dummy state if no one is logged in
-    setLoggedInStudent(null);
-    setHasAccess(true); // Or false, depending on desired default behavior
-    return;
-  }
+    if (!studentRollNo) {
+      setLoggedInStudent(null);
+      setHasAccess(true);
+      return;
+    }
 
-  const branch = extractBranchFromRollNo(studentRollNo);
-  const academicYear = extractAcademicYearFromRollNo(studentRollNo);
-  setLoggedInStudent({
-    rollNo: studentRollNo,
-    branch,
-    academicYear,
-  });
+    const branch = extractBranchFromRollNo(studentRollNo);
+    const academicYear = extractAcademicYearFromRollNo(studentRollNo);
+    setLoggedInStudent({
+      rollNo: studentRollNo,
+      branch,
+      academicYear,
+    });
 
-  // Corrected Logic:
-  // Check if the logged-in user is the dummy student
-  if (studentRollNo === '160123737141') {
-    axios.get(`${API_URL}/faculty/dummy-student/status`)
-      .then((res) => {
-        setHasAccess(res.data.isAccessGranted);
-      })
-      .catch((err) => {
-        console.warn("Failed to fetch access status:", err.message);
-        setHasAccess(false); // Default to no access on error
-      });
-  } else {
-    // Any other student has access by default
-    setHasAccess(true);
-  }
-}, []);
-
+    if (studentRollNo === '160123737141') {
+      axios.get(`${API_URL}/faculty/dummy-student/status`)
+        .then((res) => {
+          setHasAccess(res.data.isAccessGranted);
+        })
+        .catch((err) => {
+          console.warn("Failed to fetch access status:", err.message);
+          setHasAccess(false);
+        });
+    } else {
+      setHasAccess(true);
+    }
+  }, []);
 
   // Get academic years that actually have projects
   const getAvailableAcademicYears = () => {
@@ -114,6 +146,7 @@ useEffect(() => {
           type: filterType !== 'all' ? filterType : undefined,
           search: searchTerm || undefined,
           branch: filterBranch !== 'all' ? filterBranch : undefined,
+          domain: filterDomain !== 'all' ? filterDomain : undefined,
           academicYear: filterAcademicYear !== 'all' ? filterAcademicYear : undefined,
           sort: sortAcademicYear !== 'none' ? sortAcademicYear : undefined
         },
@@ -124,7 +157,7 @@ useEffect(() => {
       console.error('Error fetching projects:', error);
       alert('Failed to fetch projects');
     }
-  }, [filterType, searchTerm, filterBranch, filterAcademicYear, sortAcademicYear]);
+  }, [filterType, searchTerm, filterBranch, filterDomain, filterAcademicYear, sortAcademicYear]);
 
   useEffect(() => {
     fetchProjects();
@@ -151,7 +184,7 @@ useEffect(() => {
     data.append('projectName', formData.projectName);
     data.append('projectType', formData.projectType);
     data.append('description', formData.description);
-    data.append('techStack', JSON.stringify(formData.techStack.split(',').map(t => t.trim())));
+    data.append('domain', formData.domain);
     data.append('studentName', formData.studentName);
     data.append('email', formData.email);
     data.append('rollNo', loggedInStudent.rollNo);
@@ -170,7 +203,7 @@ useEffect(() => {
         projectName: '',
         projectType: 'mini',
         description: '',
-        techStack: '',
+        domain: '',
         studentName: '',
         email: '',
         githubLink: '',
@@ -203,253 +236,286 @@ useEffect(() => {
 
   const availableAcademicYears = getAvailableAcademicYears();
 
-return (
-  <div>
-    {!hasAccess && (
-      <div className="access-overlay">
-        <p>Access Revoked by Faculty</p>
+const handleLogout = () => {
+  localStorage.removeItem("studentRollNo");
+  window.location.href = "/"; // Redirect to login page
+};
+
+  return (
+    <div>
+      {!hasAccess && (
+        <div className="access-overlay">
+          <p>Access Revoked by Faculty</p>
+        </div>
+      )}
+      <div className={`App ${!hasAccess ? 'blurred' : ''}`}>
+        <header className="header">
+        <div className="header-content">
+          <div className="header-text">
+          <h1>📚 Student Projects Repository</h1>
+          <p>Share and explore student projects</p>
+          </div>
+          <button className="logout-btn" onClick={handleLogout}>Logout</button>
+        </div>
+        </header>
+
+        <div className="container">
+          <div className="controls">
+            <button className="upload-btn" onClick={() => setShowUploadForm(!showUploadForm)}>
+              {showUploadForm ? '✖ Close' : '➕ Upload Project'}
+            </button>
+
+            <div className="filters">
+              <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+                <option value="all">All Projects</option>
+                <option value="mini">Mini Projects</option>
+                <option value="major">Major Projects</option>
+              </select>
+
+              <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)}>
+                <option value="all">All Branches</option>
+                {ALL_BRANCHES.map((branch, index) => (
+                  <option key={index} value={branch}>{branch}</option>
+                ))}
+              </select>
+
+<select value={filterDomain} onChange={(e) => setFilterDomain(e.target.value)}>
+  <option value="all">All Domains</option>
+  {DOMAIN_OPTIONS.map((domain, index) => (
+    <option key={index} value={domain}>{domain}</option>
+  ))}
+</select>
+
+              <select value={filterAcademicYear} onChange={(e) => setFilterAcademicYear(e.target.value)}>
+                <option value="all">All Academic Years</option>
+                {availableAcademicYears
+                  .filter(year => year !== 'all')
+                  .sort((a, b) => b.localeCompare(a))
+                  .map((year, index) => (
+                    <option key={index} value={year}>{year}</option>
+                  ))
+                }
+              </select>
+
+              <select value={sortAcademicYear} onChange={(e) => setSortAcademicYear(e.target.value)}>
+                <option value="none">Sort by Year</option>
+                <option value="asc">Academic Year (Oldest First)</option>
+                <option value="desc">Academic Year (Newest First)</option>
+              </select>
+
+              <input
+                type="text"
+                placeholder="Search projects..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          </div>
+
+{showUploadForm && loggedInStudent && (
+  <div className="upload-modal-overlay">
+    <div className="upload-modal">
+      <div className="upload-modal-header">
+        <h2>Upload New Project</h2>
+        <button 
+          className="close-modal-btn"
+          onClick={() => setShowUploadForm(false)}
+        >
+          ×
+        </button>
       </div>
-    )}
-    <div className={`App ${!hasAccess ? 'blurred' : ''}`}>
-      <header className="header">
-        <h1>📚 Student Projects Repository</h1>
-        <p>Share and explore student projects</p>
-      </header>
+      <div className="upload-form">
+        {/* Keep all your existing upload form content exactly as it is */}
+        {/* Student Info Display */}
+        <div className="student-info-display">
+          <h4>Student Information (Auto-detected)</h4>
+          <div className="student-info-grid">
+            <div className="info-item">
+              <span className="info-label">Roll No:</span>
+              <span className="info-value">{loggedInStudent.rollNo}</span>
+            </div>
+            <div className="info-item">
+              <span className="info-label">Branch:</span>
+              <span className="info-value">{loggedInStudent.branch}</span>
+            </div>
+            <div className="info-item">
+              <span className="info-label">Academic Year:</span>
+              <span className="info-value">{loggedInStudent.academicYear}</span>
+            </div>
+          </div>
+        </div>
 
-      <div className="container">
-        <div className="controls">
-          <button className="upload-btn" onClick={() => setShowUploadForm(!showUploadForm)}>
-            {showUploadForm ? '✖ Close' : '➕ Upload Project'}
-          </button>
+        <form onSubmit={handleSubmit}>
+          {/* Project Name, Type, and Domain in one row */}
+          <div className="form-row-three">
+            <div className="form-group">
+              <label>Project Name *</label>
+              <input
+                type="text"
+                name="projectName"
+                value={formData.projectName}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
 
-          <div className="filters">
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-              <option value="all">All Projects</option>
-              <option value="mini">Mini Projects</option>
-              <option value="major">Major Projects</option>
-            </select>
+            <div className="form-group">
+              <label>Project Type *</label>
+              <select
+                name="projectType"
+                value={formData.projectType}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="mini">Mini Project</option>
+                <option value="major">Major Project</option>
+              </select>
+            </div>
 
-            <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)}>
-              <option value="all">All Branches</option>
-              {ALL_BRANCHES.map((branch, index) => (
-                <option key={index} value={branch}>{branch}</option>
-              ))}
-            </select>
+            <div className="form-group">
+              <label>Domain *</label>
+              <select
+                name="domain"
+                value={formData.domain}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Domain</option>
+                {DOMAIN_OPTIONS.map((domain, index) => (
+                  <option key={index} value={domain}>{domain}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-            <select value={filterAcademicYear} onChange={(e) => setFilterAcademicYear(e.target.value)}>
-              <option value="all">All Academic Years</option>
-              {availableAcademicYears
-                .filter(year => year !== 'all')
-                .sort((a, b) => b.localeCompare(a))
-                .map((year, index) => (
-                  <option key={index} value={year}>{year}</option>
-                ))
-              }
-            </select>
-
-            <select value={sortAcademicYear} onChange={(e) => setSortAcademicYear(e.target.value)}>
-              <option value="none">Sort by Year</option>
-              <option value="asc">Academic Year (Oldest First)</option>
-              <option value="desc">Academic Year (Newest First)</option>
-            </select>
-
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
+          <div className="form-group">
+            <label>Description *</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              rows="4"
+              required
             />
           </div>
-        </div>
 
-        {showUploadForm && loggedInStudent && (
-          <div className="upload-form">
-            <h2>Upload New Project</h2>
-
-            {/* Student Info Display */}
-            <div className="student-info-display">
-              <h4>Student Information (Auto-detected)</h4>
-              <div className="info-row">
-                <span className="info-label">Roll No:</span>
-                <span className="info-value">{loggedInStudent.rollNo}</span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Branch:</span>
-                <span className="info-value">{loggedInStudent.branch}</span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Academic Year:</span>
-                <span className="info-value">{loggedInStudent.academicYear}</span>
-              </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Student Name *</label>
+              <input
+                type="text"
+                name="studentName"
+                value={formData.studentName}
+                onChange={handleInputChange}
+                required
+              />
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Project Name *</label>
-                  <input
-                    type="text"
-                    name="projectName"
-                    value={formData.projectName}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Project Type *</label>
-                  <select
-                    name="projectType"
-                    value={formData.projectType}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="mini">Mini Project</option>
-                    <option value="major">Major Project</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Description *</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows="4"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Tech Stack (comma separated) *</label>
-                <input
-                  type="text"
-                  name="techStack"
-                  value={formData.techStack}
-                  onChange={handleInputChange}
-                  placeholder="e.g., React, Node.js, MongoDB"
-                  required
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Student Name *</label>
-                  <input
-                    type="text"
-                    name="studentName"
-                    value={formData.studentName}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>GitHub Link (Optional)</label>
-                <input
-                  type="url"
-                  name="githubLink"
-                  value={formData.githubLink}
-                  onChange={handleInputChange}
-                  placeholder="https://github.com/username/repository"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Upload Report (PDF) *</label>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileChange}
-                  required
-                />
-              </div>
-
-              <button type="submit" className="submit-btn">
-                Submit Project
-              </button>
-            </form>
+            <div className="form-group">
+              <label>Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
           </div>
-        )}
 
-        <div className="projects-grid">
-          {projects.length === 0 ? (
-            <div className="no-projects">
-              <p>No projects found. Be the first to upload!</p>
-            </div>
-          ) : (
-            projects.map((project) => (
-              <div key={project._id} className="project-card">
-                <div className="project-header">
-                  <h3>{project.projectName}</h3>
-                  <span className={`badge ${project.projectType}`}>
-                    {project.projectType.toUpperCase()}
-                  </span>
-                </div>
+          <div className="form-group">
+            <label>GitHub Link (Optional)</label>
+            <input
+              type="url"
+              name="githubLink"
+              value={formData.githubLink}
+              onChange={handleInputChange}
+              placeholder="https://github.com/username/repository"
+            />
+          </div>
 
-                <p className="description">{project.description}</p>
-
-                <div className="tech-stack">
-                  {project.techStack && project.techStack.map((tech, index) => (
-                    <span key={index} className="tech-tag">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="project-meta">
-                  {project.branch && (
-                    <span className="branch-tag">🏛️ {project.branch}</span>
-                  )}
-                  {project.academicYear && (
-                    <span className="year-tag">🎓 {project.academicYear}</span>
-                  )}
-                </div>
-
-                <div className="project-footer">
-                  <div className="student-info">
-                    <p><strong>👤 {project.studentName}</strong></p>
-                    <p className="email">✉ {project.email}</p>
-                    {project.rollNo && <p className="rollno">🔢 {project.rollNo}</p>}
-                    <p className="date">
-                      📅 {new Date(project.uploadDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  
-                  <div className="project-actions">
-                    {project.githubLink && (
-                      <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="github-link">
-                        🔗 GitHub
-                      </a>
-                    )}
-                    <button
-                      className="download-btn"
-                      onClick={() => handleDownload(project.reportFile, project.projectName)}
-                    >
-                      📥 Download Report
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+          <div className="form-group">
+            <label>Upload Report (PDF) *</label>
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              required
+            />
+          </div>
+          <div className="submit-btn-container">
+          <button type="submit" className="submit-btn">
+            Submit Project
+          </button>
+          </div>
+        </form>
       </div>
     </div>
+  </div>
+)}
+          <div className="projects-table-container">
+            {projects.length === 0 ? (
+              <div className="no-projects">
+                <p>No projects found. Be the first to upload!</p>
+              </div>
+            ) : (
+              <table className="projects-table">
+                <thead>
+                  <tr>
+                    <th>Project Name</th>
+                    <th>Type</th>
+                    <th>Domain</th>
+                    <th>Description</th>
+                    <th>Student</th>
+                    <th>Branch</th>
+                    <th>Academic Year</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {projects.map((project) => (
+                    <tr key={project._id}>
+                      <td className="project-name">
+                        <strong>{project.projectName}</strong>
+                        {project.githubLink && (
+                          <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="github-link-table">
+                            🔗
+                          </a>
+                        )}
+                      </td>
+                      <td>
+                        <span className={`badge ${project.projectType}`}>
+                          {project.projectType.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>{project.domain}</td>
+                      <td className="description-cell">
+                        <div className="description-text">{project.description}</div>
+                      </td>
+                      <td className="student-info-cell">
+                        <div><strong>{project.studentName}</strong></div>
+                        <div className="email">{project.email}</div>
+                        <div className="rollno">{project.rollNo}</div>
+                      </td>
+                      <td>{project.branchShort || BRANCH_SHORT_FORMS[project.branch] || project.branch}</td>
+                      <td>{project.academicYear}</td>
+                      <td className="actions-cell">
+                        <button
+                          className="download-btn"
+                          onClick={() => handleDownload(project.reportFile, project.projectName)}
+                        >
+                          📥 Download
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

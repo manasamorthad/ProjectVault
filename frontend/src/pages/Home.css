@@ -1,41 +1,59 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-}
+/* Home.css */
 
 .App {
-  min-height: 100vh;
-  padding-bottom: 50px;
+  text-align: center;
 }
 
 .header {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 30px;
-  text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
 }
 
 .header h1 {
-  color: #667eea;
+  margin: 0;
   font-size: 2.5rem;
-  margin-bottom: 10px;
 }
 
 .header p {
-  color: #666;
-  font-size: 1.1rem;
+  margin: 0.5rem 0 0 0;
+  font-size: 1.2rem;
+  opacity: 0.9;
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.header-text {
+  flex: 1;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -44,166 +62,302 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 2rem;
   gap: 20px;
-  flex-wrap: wrap;
 }
 
 .upload-btn {
-  background: #667eea;
+  background: #4CAF50;
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s;
-  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.3s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .upload-btn:hover {
-  background: #5568d3;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background: #45a049;
 }
 
 .filters {
   display: flex;
-  gap: 15px;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 1;
+  justify-content: flex-start;
 }
 
 .filters select,
-.search-input {
-  padding: 10px 15px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
+.filters input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
   background: white;
-  transition: border-color 0.3s;
+  height: 40px;
+  box-sizing: border-box;
 }
 
-.filters select:focus,
-.search-input:focus {
-  outline: none;
-  border-color: #667eea;
+/* Updated filter widths */
+.filters select {
+  width: auto;
+  min-width: 120px;
 }
 
 .search-input {
-  min-width: 250px;
+  width: 200px;
+  min-width: 150px;
 }
 
 .upload-form {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: #f5f5f5;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: left;
 }
 
 .upload-form h2 {
-  color: #667eea;
-  margin-bottom: 25px;
-  font-size: 1.8rem;
+  margin-top: 0;
+  color: #333;
+}
+
+.student-info-display {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  border-left: 4px solid #667eea;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.student-info-display h4 {
+  margin: 0 0 1.5rem 0;
+  color: #333;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.form-row-three {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.student-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: #333;
+  font-size: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
 }
 
 .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  flex: 1;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  color: #333;
+  margin-bottom: 0.75rem;
   font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
 }
 
 .form-group input,
-.form-group textarea,
-.form-group select {
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 12px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: inherit;
-  transition: border-color 0.3s;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
   outline: none;
   border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.submit-btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }
 
 .submit-btn {
   background: #667eea;
   color: white;
   border: none;
-  padding: 14px 32px;
+  padding: 14px 40px;
   border-radius: 8px;
-  font-size: 1.1rem;
   cursor: pointer;
-  transition: all 0.3s;
+  font-size: 16px;
   font-weight: 600;
-  width: 100%;
-  margin-top: 10px;
+  transition: background 0.3s, transform 0.2s;
+  min-width: 200px;
 }
 
 .submit-btn:hover {
-  background: #5568d3;
+  background: #5a6fd8;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 25px;
-}
-
-.project-card {
+/* Table Styles */
+.projects-table-container {
+  margin-top: 2rem;
+  overflow-x: auto;
   background: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
-  display: flex;
-  flex-direction: column;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.project-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+.projects-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed; /* Add this for consistent column widths */
 }
 
-.project-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-  gap: 10px;
-}
-
-.project-header h3 {
+.projects-table th {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  text-align: left; /* Ensure headers are left-aligned */
+  font-weight: 600;
   color: #333;
-  font-size: 1.4rem;
-  flex: 1;
+  border-bottom: 2px solid #e9ecef;
+  white-space: nowrap;
+}
+
+.projects-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: top;
+  text-align: left; /* Ensure all cell content is left-aligned */
+  word-wrap: break-word; /* Handle long text */
+}
+
+/* Define specific column widths for better layout */
+.projects-table th:nth-child(1), /* Project Name */
+.projects-table td:nth-child(1) {
+  width: 15%;
+  min-width: 150px;
+}
+
+.projects-table th:nth-child(2), /* Type */
+.projects-table td:nth-child(2) {
+  width: 8%;
+  min-width: 80px;
+}
+
+.projects-table th:nth-child(3), /* Domain */
+.projects-table td:nth-child(3) {
+  width: 12%;
+  min-width: 120px;
+}
+
+.projects-table th:nth-child(4), /* Description */
+.projects-table td:nth-child(4) {
+  width: 25%;
+  min-width: 200px;
+}
+
+.projects-table th:nth-child(5), /* Student */
+.projects-table td:nth-child(5) {
+  width: 15%;
+  min-width: 150px;
+}
+
+.projects-table th:nth-child(6), /* Branch */
+.projects-table td:nth-child(6) {
+  width: 8%;
+  min-width: 80px;
+}
+
+.projects-table th:nth-child(7), /* Academic Year */
+.projects-table td:nth-child(7) {
+  width: 10%;
+  min-width: 100px;
+}
+
+.projects-table th:nth-child(8), /* Actions */
+.projects-table td:nth-child(8) {
+  width: 7%;
+  min-width: 100px;
+  text-align: center; /* Keep actions centered */
+}
+
+.projects-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.project-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.github-link-table {
+  margin-left: 8px;
+  text-decoration: none;
+  font-size: 12px;
 }
 
 .badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
   white-space: nowrap;
+  display: inline-block;
+  text-align: center;
 }
 
 .badge.mini {
@@ -216,283 +370,304 @@ body {
   color: #7b1fa2;
 }
 
-.description {
+.description-cell {
+  text-align: left;
+}
+
+.description-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
   color: #666;
-  line-height: 1.6;
-  margin-bottom: 15px;
-  flex: 1;
+  text-align: left;
 }
 
-.tech-stack {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
+.student-info-cell {
+  text-align: left;
 }
 
-.tech-tag {
-  background: #f0f0f0;
-  color: #667eea;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 0.85rem;
-  font-weight: 500;
+.student-info-cell > div {
+  text-align: left;
 }
 
-.project-footer {
-  border-top: 1px solid #eee;
-  padding-top: 15px;
-  margin-top: auto;
+.student-info-cell .email,
+.student-info-cell .rollno {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+  text-align: left;
 }
 
-.student-info {
-  margin-bottom: 15px;
-}
-
-.student-info p {
-  margin-bottom: 5px;
-  color: #555;
-  font-size: 0.9rem;
-}
-
-.email {
-  color: #667eea !important;
-}
-
-.date {
-  color: #999 !important;
-  font-size: 0.85rem !important;
+.actions-cell {
+  white-space: nowrap;
+  text-align: center; /* Keep download button centered */
 }
 
 .download-btn {
-  width: 100%;
-  background: #4caf50;
+  background: #4CAF50;
   color: white;
   border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 6px 12px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s;
-  font-weight: 600;
+  font-size: 12px;
+  transition: background 0.3s;
+  white-space: nowrap;
 }
 
 .download-btn:hover {
   background: #45a049;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
 
 .no-projects {
-  grid-column: 1 / -1;
   text-align: center;
-  padding: 60px 20px;
-  background: white;
-  border-radius: 12px;
-  color: #999;
-  font-size: 1.2rem;
-}
-
-/* Add to existing Home.css */
-.readonly-field {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-}
-
-.project-meta {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0;
-  flex-wrap: wrap;
-}
-
-.branch-tag, .year-tag {
-  background: #e3f2fd;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.8em;
-  color: #1976d2;
-}
-
-.rollno {
-  font-size: 0.9em;
+  padding: 3rem;
   color: #666;
-  margin: 2px 0;
 }
 
-.filters {
+.no-projects p {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.access-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-}
-
-.filters select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
-}
-
-/* Add to Home.css */
-.auto-detected {
-  font-size: 0.8em;
-  color: #28a745;
-  margin-top: 5px;
+  z-index: 1000;
+  color: white;
+  font-size: 2rem;
   font-weight: bold;
 }
 
-.project-actions {
+.blurred {
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Bigger Modal Styles */
+.upload-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
-  gap: 10px;
+  justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
-  width: 100%; /* Add this */
-}
-.github-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center; /* Add this */
-  gap: 5px;
-  color: #333;
-  text-decoration: none;
-  padding: 12px; /* Change from 8px 12px to 12px */
-  border: 1px solid #ddd;
-  border-radius: 8px; /* Change from 4px to 8px to match download button */
-  transition: all 0.3s ease;
-  background: white;
-  font-weight: 600; /* Add this to match download button */
-  flex: 1; /* Add this to make it take equal width */
-  text-align: center; /* Add this */
-}
-
-.github-link:hover {
-  background-color: #f5f5f5;
-  text-decoration: none;
-  border-color: #999;
-  transform: translateY(-2px); /* Add hover effect to match download button */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add hover effect to match download button */
-}
-
-.student-info-display {
-  background: #f8f9fa;
+  z-index: 1000;
   padding: 20px;
+}
+
+.upload-modal {
+  background: white;
   border-radius: 12px;
-  margin-bottom: 25px;
-  border-left: 4px solid #667eea;
-  border: 2px solid #e9ecef;
+  width: 95%;
+  max-width: 1000px;
+  max-height: 95vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.student-info-display h4 {
-  color: #667eea;
-  margin-bottom: 15px;
-  font-size: 1.1rem;
-  font-weight: 600;
+.upload-modal .upload-form {
+  margin: 0;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 12px;
 }
 
-.info-row {
+.upload-modal .upload-form h2 {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  color: #333;
+  font-size: 1.8rem;
+  text-align: center;
+  border-bottom: 3px solid #667eea;
+  padding-bottom: 1rem;
+}
+
+/* Close button styling */
+.upload-modal-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid #e9ecef;
+  align-items: center;
+  padding: 2rem 2.5rem 1rem;
+  border-bottom: 1px solid #eee;
 }
 
-.info-row:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-}
-
-.info-label {
-  font-weight: 600;
-  color: #555;
-  font-size: 0.95rem;
-}
-
-.info-value {
+.upload-modal-header h2 {
+  margin: 0;
   color: #333;
-  font-weight: 500;
+  font-size: 1.8rem;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.3s;
+}
+
+.close-modal-btn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .filters {
+    gap: 8px;
+  }
+  
+  .filters select {
+    min-width: 110px;
+  }
+  
+  .search-input {
+    width: 180px;
+    min-width: 140px;
+  }
+  
+  .upload-modal {
+    width: 98%;
+    max-width: 900px;
+  }
 }
 
 @media (max-width: 768px) {
   .header h1 {
     font-size: 2rem;
   }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .projects-grid {
-    grid-template-columns: 1fr;
-  }
-
+  
   .controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 15px;
   }
-
+  
+  .upload-btn {
+    align-self: flex-end;
+    width: auto;
+  }
+  
   .filters {
     flex-direction: column;
+    align-items: stretch;
   }
-
-  .search-input {
+  
+  .filters select,
+  .filters input {
+    width: 100% !important;
+    min-width: auto !important;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .projects-table-container {
+    overflow-x: auto;
+  }
+  
+  .projects-table {
+    table-layout: auto; /* Allow flexible layout on mobile */
+  }
+  
+  .projects-table th,
+  .projects-table td {
+    width: auto !important; /* Remove fixed widths on mobile */
     min-width: auto;
   }
-}
-/* Add to your Home.css file */
 
-.blurred-content > *:not(.access-denied-overlay) {
-  filter: blur(8px);
-  pointer-events: none;
-  user-select: none;
+    .projects-table th:nth-child(8),
+  .projects-table td:nth-child(8) {
+    text-align: center;
+  }
+  
+  .form-row-three {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .student-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .info-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .info-label {
+    min-width: 100px;
+  }
+  
+  .upload-modal {
+    width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .upload-modal .upload-form {
+    padding: 1.5rem;
+  }
+  
+  .upload-modal-header {
+    padding: 1.5rem 1.5rem 1rem;
+  }
 }
 
-.access-denied-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-  z-index: 1000;
-  text-align: center;
-  padding: 2rem;
-}
-
-.access-denied-overlay h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.access-denied-overlay p {
-  font-size: 1.2rem;
-}
-/* blur the content when access is revoked */
-.blurred {
-  filter: blur(5px);
-  pointer-events: none; /* prevent interaction */
-}
-
-/* overlay message on top of blurred content */
-.access-overlay {
-  position: fixed; /* stay on top */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255,255,255,0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: red;
-  pointer-events: none;
+@media (max-width: 480px) {
+  .container {
+    padding: 0 10px;
+  }
+  
+  .upload-form {
+    padding: 1rem;
+  }
+  
+  .controls {
+    gap: 10px;
+  }
+  
+  .upload-modal .upload-form {
+    padding: 1rem;
+  }
+  
+  .upload-modal-header {
+    padding: 1rem 1rem 0.5rem;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .info-value {
+    width: 100%;
+    text-align: left;
+  }
 }
