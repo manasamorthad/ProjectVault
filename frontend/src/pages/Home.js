@@ -70,7 +70,7 @@ function Home() {
   const [sortAcademicYear, setSortAcademicYear] = useState('none');
   const [loggedInStudent, setLoggedInStudent] = useState(null);
   const [hasAccess, setHasAccess] = useState(true);
-
+  const [hasViewAccess, setHasViewAccess] = useState(true);
   const [formData, setFormData] = useState({
     projectName: '',
     projectType: 'mini',
@@ -101,36 +101,39 @@ function Home() {
     return 'Unknown';
   };
 
-  useEffect(() => {
-    const studentRollNo = localStorage.getItem("studentRollNo");
+ // Replace your existing useEffect with this:
+// In your Home.js, replace the existing useEffect with this:
+useEffect(() => {
+  const studentRollNo = localStorage.getItem("studentRollNo");
 
-    if (!studentRollNo) {
-      setLoggedInStudent(null);
-      setHasAccess(true);
-      return;
-    }
+  if (!studentRollNo) {
+    setLoggedInStudent(null);
+    setHasViewAccess(true); // Allow viewing for non-logged in users
+    return;
+  }
 
-    const branch = extractBranchFromRollNo(studentRollNo);
-    const academicYear = extractAcademicYearFromRollNo(studentRollNo);
-    setLoggedInStudent({
-      rollNo: studentRollNo,
-      branch,
-      academicYear,
+  const branch = extractBranchFromRollNo(studentRollNo);
+  const academicYear = extractAcademicYearFromRollNo(studentRollNo);
+  setLoggedInStudent({
+    rollNo: studentRollNo,
+    branch,
+    academicYear,
+  });
+
+ 
+
+  // Check view access for the student's department
+  axios.get(`${API_URL}/faculty/student-view-access/${studentRollNo}`)
+    .then((res) => {
+      setHasViewAccess(res.data.hasViewAccess);
+    })
+    .catch((err) => {
+      console.warn("Failed to fetch view access status:", err.message);
+      setHasViewAccess(true); // Default to allowed if error
     });
 
-    if (studentRollNo === '160123737141') {
-      axios.get(`${API_URL}/faculty/dummy-student/status`)
-        .then((res) => {
-          setHasAccess(res.data.isAccessGranted);
-        })
-        .catch((err) => {
-          console.warn("Failed to fetch access status:", err.message);
-          setHasAccess(false);
-        });
-    } else {
-      setHasAccess(true);
-    }
-  }, []);
+ 
+}, []);
 
   // Get academic years that actually have projects
   const getAvailableAcademicYears = () => {
@@ -248,7 +251,12 @@ const handleLogout = () => {
           <p>Access Revoked by Faculty</p>
         </div>
       )}
-      <div className={`App ${!hasAccess ? 'blurred' : ''}`}>
+       {!hasViewAccess && (
+      <div className="access-overlay">
+        <p>View access restricted for your department. Contact faculty for access.</p>
+      </div>
+    )}
+      <div className={`App ${!hasAccess || !hasViewAccess ? 'blurred' : ''}`}>
         <header className="header">
         <div className="header-content">
           <div className="header-text">
@@ -261,10 +269,10 @@ const handleLogout = () => {
 
         <div className="container">
           <div className="controls">
+            {hasViewAccess && loggedInStudent && (
             <button className="upload-btn" onClick={() => setShowUploadForm(!showUploadForm)}>
-              {showUploadForm ? '✖ Close' : '➕ Upload Project'}
-            </button>
-
+            {showUploadForm ? '✖ Close' : '➕ Upload Project'}
+            </button>)}
             <div className="filters">
               <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
                 <option value="all">All Projects</option>

@@ -3,65 +3,113 @@ import axios from 'axios';
 import './FacultyDashboard.css';
 
 function FacultyDashboard() {
-  const [isAccessGranted, setIsAccessGranted] = useState(null);
-  const [error, setError] = useState('');
-  const DUMMY_STUDENT_ROLL = '160123737141';
-
-  useEffect(() => {
-    const fetchAccessStatus = async () => {
-      try {
-        const res = await axios.get(`${process.env.REACT_APP_API_URL}/faculty/dummy-student/status`);
-        setIsAccessGranted(res.data.isAccessGranted);
-      } catch (err) {
-        setError('Failed to fetch student access status.');
+  const [departmentAccess, setDepartmentAccess] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('facultyToken');
+    return {
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
     };
-    fetchAccessStatus();
+  };
+
+  useEffect(() => {
+    fetchDepartmentAccess();
   }, []);
 
-  const handleToggleAccess = async () => {
+  const fetchDepartmentAccess = async () => {
     try {
-      const res = await axios.put(`${process.env.REACT_APP_API_URL}/faculty/dummy-student/toggle-access`);
-      setIsAccessGranted(res.data.isAccessGranted);
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/faculty/department-access`,
+        getAuthHeaders());
+      setDepartmentAccess(res.data);
+      setLoading(false);
     } catch (err) {
-      alert('Failed to update access.');
+      setMessage('Failed to fetch department access status.');
+      setLoading(false);
     }
+  };
+
+  const handleToggleAccess = async (department) => {
+    try {
+      const res = await axios.put(`${process.env.REACT_APP_API_URL}/faculty/department-access/${department}`
+        , {}, getAuthHeaders()
+      );
+      setDepartmentAccess(prev => ({
+        ...prev,
+        [department]: res.data.accessGranted
+      }));
+      setMessage(res.data.message);
+      
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setMessage('Failed to update department access.');
+    }
+  };
+
+  const departmentNames = {
+    'IT': 'Information Technology',
+    'CSE': 'Computer Science & Engineering',
+    'CIVIL': 'Civil Engineering',
+    'EEE': 'Electrical & Electronics Engineering',
+    'ECE': 'Electronics & Communication Engineering',
+    'MECH': 'Mechanical Engineering',
+    'PROD': 'Production Engineering',
+    'CHEM': 'Chemical Engineering',
+    'BIO-TECH': 'Bio Technology',
+    'AIDS': 'Artificial Intelligence & Data Science',
+    'IOT-CS': 'IoT & Cyber Security',
+    'AIML': 'Artificial Intelligence & Machine Learning'
   };
 
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
         <h1>Faculty Dashboard</h1>
-        <p>Manage Dummy Student Access</p>
+        <p>Manage Department View Access</p>
+        <p className="dashboard-subtitle">
+          Grant view and download access to entire departments. Students can view and download projects but cannot upload.
+        </p>
       </header>
       
-      {error && <p className="error-message">{error}</p>}
-      
-      {isAccessGranted !== null ? (
-        <div className="student-card">
-          <div className="student-info">
-            <span className="roll-number-label">Student Roll No:</span>
-            <span className="roll-number-value">{DUMMY_STUDENT_ROLL}</span>
-          </div>
-          <div className="access-status">
-            <span className="status-label">Current Status:</span>
-            <span className={`status ${isAccessGranted ? 'approved' : 'pending'}`}>
-              {isAccessGranted ? 'Access Granted' : 'Access Revoked'}
-            </span>
-          </div>
-          <button
-            className={`toggle-btn ${isAccessGranted ? 'revoke' : 'grant'}`}
-            onClick={handleToggleAccess}
-          >
-            {isAccessGranted ? 'Revoke Access' : 'Grant Access'}
-          </button>
+      {message && (
+        <div className={`message ${message.includes('granted') ? 'success' : 'error'}`}>
+          {message}
         </div>
+      )}
+      
+      {loading ? (
+        <div className="loading">Loading department access...</div>
       ) : (
-        !error && <p>Loading student data...</p>
+        <div className="department-access-container">
+          <h2>Department Access Control</h2>
+          <div className="department-grid">
+            {Object.entries(departmentAccess).map(([dept, hasAccess]) => (
+              <div key={dept} className="department-card">
+                <div className="department-info">
+                  <h3 className="department-name">{departmentNames[dept] || dept}</h3>
+                  <span className="department-code">({dept})</span>
+                </div>
+                <div className="access-status">
+                  <span className={`status ${hasAccess ? 'granted' : 'revoked'}`}>
+                    {hasAccess ? '🔓 View Access Granted' : '🔒 View Access Revoked'}
+                  </span>
+                </div>
+                <button
+                  className={`toggle-btn ${hasAccess ? 'revoke' : 'grant'}`}
+                  onClick={() => handleToggleAccess(dept)}
+                >
+                  {hasAccess ? 'Revoke View Access' : 'Grant View Access'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
 export default FacultyDashboard;
-
