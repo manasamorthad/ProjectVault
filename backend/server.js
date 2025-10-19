@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import loginRoutes from "./routes/login.js";
 import projectRoutes from "./routes/projects.js";
 import facultyRoutes from "./routes/faculty.js"; // Import faculty routes
-
+import adminRoutes from './routes/admin.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -28,6 +28,7 @@ mongoose.connect(process.env.MONGO_URI)
 app.use("/api", loginRoutes);
 app.use("/api/faculty", facultyRoutes); // Use faculty routes
 app.use("/api/projects", projectRoutes);
+app.use('/api/admin', adminRoutes);
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });

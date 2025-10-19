@@ -98,6 +98,9 @@ function LoginPage() {
         <div className="faculty-link-container">
           <Link to="/faculty-login">Login as Faculty &rarr;</Link>
         </div>
+        <div className="faculty-link-container">
+          <Link to="/admin-login">Login as Admin &rarr;</Link>
+        </div>
       </div>
     </div>
   );
