@@ -98,7 +98,7 @@ function ResetPassword() {
       
       // Redirect to login after 2 seconds
       setTimeout(() => {
-        navigate("/");
+        window.location.href = "https://projectvault-cbit.onrender.com/";
       }, 2000);
 
     } catch (err) {
