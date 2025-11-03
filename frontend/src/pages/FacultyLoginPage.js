@@ -13,7 +13,7 @@ function FacultyLoginPage() {
   const [isSending, setIsSending] = useState(false);
 
   const navigate = useNavigate();
-  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+  const API_URL = "https://projectvault-2.onrender.com";
 
   const handleLogin = async (e) => {
     e.preventDefault();

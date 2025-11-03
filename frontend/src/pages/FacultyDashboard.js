@@ -33,7 +33,7 @@ function FacultyDashboard() {
 
   const handleToggleAccess = async (department) => {
     try {
-      const res = await axios.put(`${process.env.REACT_APP_API_URL}/faculty/department-access/${department}`
+      const res = await axios.put(`https://projectvault-2.onrender.com/faculty/department-access/${department}`
         , {}, getAuthHeaders()
       );
       setDepartmentAccess(prev => ({
