@@ -150,7 +150,7 @@ router.post("/upload-faculty", upload.single("file"), async (req, res) => {
     let successful = 0;
     let failed = 0;
 
-    // Read and parse CSV file
+    // Read and parse CSV file (handle both Windows and Unix line endings)
     fs.createReadStream(req.file.path)
       .pipe(csv({
         mapHeaders: ({ header }) => cleanKey(header),
@@ -173,15 +173,18 @@ router.post("/upload-faculty", upload.single("file"), async (req, res) => {
           const rowNumber = i + 2;
 
           try {
+            // Accept any case for 'email' header
             const email = row.email || row.Email || row.EMAIL;
+            // If the row is just a string (from a simple CSV), fallback to row itself
+            const finalEmail = typeof row === 'string' ? row.trim() : (email ? email.trim().toLowerCase() : '');
 
-            console.log(`Processing Row ${rowNumber}:`, { email });
+            console.log(`Processing Row ${rowNumber}:`, { email: finalEmail });
 
             // Validate required fields
-            if (!email) {
+            if (!finalEmail || !finalEmail.includes('@')) {
               errors.push({
                 row: `Row ${rowNumber}`,
-                error: "Missing email",
+                error: "Missing or invalid email",
                 data: row
               });
               failed++;
@@ -189,10 +192,10 @@ router.post("/upload-faculty", upload.single("file"), async (req, res) => {
             }
 
             // Check if faculty already exists
-            const existingFaculty = await Faculty.findOne({ email: email.trim().toLowerCase() });
+            const existingFaculty = await Faculty.findOne({ email: finalEmail });
             if (existingFaculty) {
               errors.push({
-                row: `Row ${rowNumber} (${email})`,
+                row: `Row ${rowNumber} (${finalEmail})`,
                 error: "Faculty already exists"
               });
               failed++;
@@ -201,14 +204,14 @@ router.post("/upload-faculty", upload.single("file"), async (req, res) => {
 
             // Create new faculty with default password
             const newFaculty = new Faculty({
-              email: email.trim().toLowerCase(),
+              email: finalEmail,
               password: "cbit123", // Will be hashed by pre-save hook
               isAdmin: false,
               role: "faculty"
             });
 
             await newFaculty.save();
-            console.log(`✅ Faculty created: ${email}`);
+            console.log(`✅ Faculty created: ${finalEmail}`);
             successful++;
 
           } catch (error) {
