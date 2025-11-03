@@ -42,16 +42,50 @@ router.get('/', async (req, res) => {
 // Create project - accepts reportLink (form field) or file upload 'reportFile'
 router.post('/', async (req, res) => {
   try {
-    const projectData = {
-      ...req.body,
-      reportLink: req.body.reportLink, // Handle report link instead of file
-    };
+    // Log the incoming request body for debugging
+    console.log('Project upload request body:', req.body);
 
-    const project = new Project(projectData);
+    // Required fields
+    const requiredFields = [
+      'projectName',
+      'projectType',
+      'description',
+      'domain',
+      'studentName',
+      'email',
+      'rollNo',
+      'branch',
+      'academicYear',
+      'reportLink'
+    ];
+
+    // Check for missing fields
+    const missing = requiredFields.filter(field => !req.body[field]);
+    if (missing.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missing.join(', ')}` });
+    }
+
+    // Create new project
+    const project = new Project({
+      projectName: req.body.projectName,
+      projectType: req.body.projectType,
+      description: req.body.description,
+      domain: req.body.domain,
+      studentName: req.body.studentName,
+      email: req.body.email,
+      rollNo: req.body.rollNo,
+      branch: req.body.branch,
+      academicYear: req.body.academicYear,
+      githubLink: req.body.githubLink,
+      publishedLink: req.body.publishedLink,
+      reportLink: req.body.reportLink
+    });
+
     await project.save();
-    res.status(201).json(project);
+    res.status(201).json({ message: "Project uploaded successfully", project });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Project upload error:', error, req.body);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
