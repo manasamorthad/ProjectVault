@@ -18,10 +18,9 @@ function App() {
         <Route path="/faculty-login" element={<FacultyLoginPage />} />
         <Route path="/faculty-dashboard" element={<FacultyDashboard />} />
         <Route path="/admin-login" element={<AdminLoginPage />} />
-         <Route path="/reset-password" element={<ResetPassword />} /> 
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
-<Route path="/faculty/reset-password" element={<FacultyResetPassword />} />
-
+        <Route path="/faculty/reset-password" element={<FacultyResetPassword />} />
       </Routes>
     </Router>
   );
