@@ -57,7 +57,7 @@ router.post("/forgot-password", async (req, res) => {
  * 🔹 Route: POST /faculty/auth/reset-password
  * 🔹 Description: Resets faculty password using valid token
  */
-router.post('/auth/reset-password', async (req, res) => {
+router.post('/reset-password', async (req, res) => {
   try {
     const { token, newPassword } = req.body;
     if (!token || !newPassword) {
