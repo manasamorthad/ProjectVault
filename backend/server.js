@@ -27,24 +27,26 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Update CORS configuration
 const allowedOrigins = [
   'https://projectvault-cbit.onrender.com',
   'http://localhost:3000'
 ];
 
-app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true
-}));
-
-app.use(express.json());
+// Dynamic CORS headers for every request
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -70,6 +72,28 @@ console.log('✅ Faculty authentication routes registered');
 app.use("/api", forgotPasswordRoutes);
 console.log('✅ Forgot password routes registered');
 console.log('================================');
+
+// Error handling for CORS
+app.use((err, req, res, next) => {
+  if (err.message.includes('CORS')) {
+    console.error('CORS Error:', {
+      origin: req.headers.origin,
+      method: req.method,
+      path: req.path
+    });
+  }
+  next(err);
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
 
 // Add a test route to verify server is working
 app.get("/api/test", (req, res) => {
