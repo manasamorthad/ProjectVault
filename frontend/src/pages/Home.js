@@ -269,6 +269,9 @@ function Home() {
       setProjects(filteredProjects);
     } catch (error) {
       console.error('Error fetching projects:', error);
+      if (error.response) {
+        console.error('Backend response:', error.response.data);
+      }
       alert(formatAxiosError(error));
       setProjects([]); // keep UI consistent
     }
@@ -295,6 +298,9 @@ function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Log form data for debugging
+    console.log('Submitting project:', formData);
+
     if (!loggedInStudent) {
       alert('Please login first');
       return;
@@ -318,7 +324,6 @@ function Home() {
     data.append('academicYear', loggedInStudent.academicYear);
     data.append('githubLink', formData.githubLink);
     data.append('publishedLink', formData.publishedLink);
-    // report is now a link
     data.append('reportLink', formData.reportLink);
 
     try {
@@ -341,8 +346,16 @@ function Home() {
       fetchProjects();
       fetchProjectStatus(loggedInStudent.rollNo);
     } catch (error) {
+      // Log full error response for debugging
       console.error('Error uploading project:', error);
-      alert(formatAxiosError(error));
+      if (error.response) {
+        console.error('Backend response:', error.response.data);
+      }
+      alert(
+        error.response?.data?.message ||
+        error.message ||
+        'Project upload failed. Please check your inputs and try again.'
+      );
     }
   };
 
