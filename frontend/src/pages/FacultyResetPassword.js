@@ -124,7 +124,7 @@ function FacultyResetPassword() {
             <input
               type={showNewPassword ? "text" : "password"}
               className="form-input"
-              placeholder=""
+              placeholder="Enter new password"
               value={newPassword}
               onChange={handlePasswordChange}
               required
@@ -141,7 +141,7 @@ function FacultyResetPassword() {
             <input
               type={showConfirmPassword ? "text" : "password"}
               className="form-input"
-              placeholder=""
+              placeholder="Enter confirm password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required

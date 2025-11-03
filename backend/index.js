@@ -192,33 +192,11 @@ function Home() {
 
   const fetchProjectStatus = async (rollNo) => {
     try {
-      if (!rollNo) {
-        console.warn('No roll number provided for status check');
-        return;
-      }
-
       const response = await axios.get(`${API_URL}/projects/student-status/${rollNo}`);
-      if (response.data && typeof response.data === 'object') {
-        setProjectStatus(prevStatus => ({
-          ...prevStatus,
-          ...response.data
-        }));
-      } else {
-        console.warn('Invalid status response:', response.data);
-        setProjectStatus({
-          'mini-I': false,
-          'mini-II': false,
-          'major': false
-        });
-      }
+      setProjectStatus(response.data);
     } catch (error) {
       console.error('Error fetching project status:', error);
-      // Don't alert on status fetch error, just reset status
-      setProjectStatus({
-        'mini-I': false,
-        'mini-II': false,
-        'major': false
-      });
+      alert(formatAxiosError(error));
     }
   };
 
@@ -617,9 +595,7 @@ function Home() {
                               <span className="status-icon">
                                 {projectStatus[type] ? '✓' : '○'}
                               </span>
-                              <span className="project-type">
-                                {type.charAt(0).toUpperCase() + type.slice(1)}
-                              </span>
+                              <span className="project-type">{type}</span>
                             </div>
                             {projectStatus[type] && (
                               <div className="status-actions">

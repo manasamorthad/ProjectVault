@@ -1,10 +1,14 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";       // ✅ Added this
-import Faculty from "../models/Faculty.js";  // ✅ Added this
+
 const router = express.Router();
 
-
+// --- Hardcoded Default Faculty Details ---
+const defaultFaculty = {
+  _id: 'facultyDefaultId01',
+  email: 'amjamaithili@gmail.com',
+  password: '12345'
+};
 
 // Store department access in memory
 let departmentAccess = {
@@ -22,59 +26,37 @@ let departmentAccess = {
   'AIML': true
 };
 
+// Faculty login middleware (verify token)
 const verifyFaculty = (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ message: "No token, authorization denied" });
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ message: 'No token, authorization denied' });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.faculty = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Token is not valid" });
+    res.status(401).json({ message: 'Token is not valid' });
   }
 };
 
-
-// ========================================================
-// 🔹 Faculty Login (with database)
-// ========================================================
+// --- FACULTY LOGIN ROUTE ---
 router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    // 1️⃣ Check if faculty exists
-    const faculty = await Faculty.findOne({ email });
-    if (!faculty) {
-      return res.status(401).json({ message: "Invalid faculty credentials" });
-    }
-
-    // 2️⃣ Compare hashed password
-    const isMatch = await bcrypt.compare(password, faculty.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid faculty credentials" });
-    }
-
-    // 3️⃣ Generate JWT
-    const token = jwt.sign(
-      { id: faculty._id, role: "faculty" },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    res.status(200).json({
-      message: "Faculty login successful",
-      token,
-      faculty: {
-        id: faculty._id,
-        email: faculty.email,
-      },
-    });
-  } catch (error) {
-    console.error("❌ Faculty login error:", error);
-    res.status(500).json({ message: "Server error during login" });
+  if (email !== defaultFaculty.email || password !== defaultFaculty.password) {
+    return res.status(401).json({ message: "Invalid faculty credentials" });
   }
+
+  const token = jwt.sign({ id: defaultFaculty._id, role: 'faculty' }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  res.status(200).json({ message: "Faculty login successful", token });
 });
+
+// --- DEPARTMENT ACCESS ROUTES ---
+
 // Get all department access status (protected)
 router.get('/department-access', verifyFaculty, (req, res) => {
   res.json(departmentAccess);
@@ -95,6 +77,7 @@ router.put('/department-access/:department', verifyFaculty, (req, res) => {
     res.status(400).json({ message: 'Invalid department' });
   }
 });
+
 // Check if a student has view access based on their branch (public)
 router.get('/student-view-access/:rollNo', async (req, res) => {
   try {

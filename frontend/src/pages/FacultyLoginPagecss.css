@@ -19,7 +19,7 @@
 .faculty-login-header h1 {
   font-size: 3rem;
   font-weight: 700;
-  color: #1d3557;
+  color: #1877f2;
   letter-spacing: 1px;
   margin-bottom: 0.3rem;
 }
@@ -48,7 +48,7 @@
 .faculty-login-box h2 {
   text-align: center;
   margin-bottom: 1.5rem;
-  color: #1d3557;
+  color: #1877f2;
   font-size: 1.8rem;
   font-weight: 600;
 }
@@ -79,7 +79,7 @@
   padding: 14px;
   border: none;
   border-radius: 6px;
-  background-color: #1d3557;
+  background-color: #1877f2;
   color: #ffffff;
   font-size: 1.1rem;
   font-weight: 600;
@@ -89,7 +89,7 @@
 
 .faculty-login-form button:hover,
 .faculty-forgot-form button:hover {
-  background-color: #264673;
+  background-color:#1877f2;
 }
 
 .faculty-forgot-link {

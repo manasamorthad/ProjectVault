@@ -1,22 +1,40 @@
-// import mongoose from "mongoose";
-
-// const facultySchema = new mongoose.Schema({
-//   email: { type: String, required: true, unique: true },
-//   password: { type: String, required: true }
-// }, { collection: "faculties" });
-
-// export default mongoose.model("Faculty", facultySchema);
-
-
-
-// models/Faculty.js
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const facultySchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  resetPasswordToken: { type: String },
-  resetPasswordExpires: { type: Date }
-}, { collection: "faculties" });
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
+  },
+  password: {
+    type: String,
+    required: true,
+    default: "cbit123"
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
+  role: {
+    type: String,
+    default: "faculty"
+  }
+}, { timestamps: true });
+
+// Hash password before saving
+facultySchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default mongoose.model("Faculty", facultySchema);

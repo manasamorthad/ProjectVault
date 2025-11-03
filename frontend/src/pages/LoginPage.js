@@ -96,7 +96,7 @@ function LoginPage() {
                 <input
                   type="text"
                   className="form-input"
-                  placeholder=""
+                  placeholder="Enter your roll number"
                   value={roll}
                   onChange={(e) => setRoll(e.target.value)}
                   required
@@ -108,7 +108,7 @@ function LoginPage() {
                 <input
                   type="password"
                   className="form-input"
-                  placeholder=""
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

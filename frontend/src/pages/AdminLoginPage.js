@@ -32,43 +32,44 @@ const AdminLoginPage = () => {
           <h2>Admin Login</h2>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <input
-              id="email"
-              type="email"
-              className="form-input"
-              placeholder=" "
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <label htmlFor="email" className="form-label">
-              Email
-            </label>
-          </div>
+ <form className="login-form" onSubmit={handleSubmit}>
+  <div className="form-group">
+    <label htmlFor="email" className="form-label">
+      Email
+    </label>
+    <input
+      id="email"
+      type="email"
+      className="form-input"
+      placeholder="Enter email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      required
+    />
+  </div>
 
-          <div className="form-group">
-            <input
-              id="password"
-              type="password"
-              className="form-input"
-              placeholder=" "
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
-          </div>
+  <div className="form-group">
+    <label htmlFor="password" className="form-label">
+      Password
+    </label>
+    <input
+      id="password"
+      type="password"
+      className="form-input"
+      placeholder="Enter password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+    />
+  </div>
 
-          <button type="submit" className="login-button">
-            Login
-          </button>
+  <button type="submit" className="login-button">
+    Login
+  </button>
 
-          {error && <div className="message error">{error}</div>}
-        </form>
+  {error && <div className="message error">{error}</div>}
+</form>
+
       </div>
     </div>
   );

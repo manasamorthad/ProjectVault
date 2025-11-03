@@ -56,7 +56,7 @@ function AdminDashboard() {
     academicYear: '',
     githubLink: '',
     publishedLink: '',
-    reportFile: null,
+    reportLink: '', // Add this instead of reportFile
   });
   const [excelFile, setExcelFile] = useState(null);
   const [uploadResults, setUploadResults] = useState(null);
@@ -139,7 +139,7 @@ function AdminDashboard() {
     data.append('academicYear', formData.academicYear);
     data.append('githubLink', formData.githubLink);
     data.append('publishedLink', formData.publishedLink);
-    data.append('reportFile', formData.reportFile);
+    data.append('reportLink', formData.reportLink); // Use reportLink instead of reportFile
     data.append('uploadedByAdmin', 'true');
 
     try {
@@ -159,7 +159,7 @@ function AdminDashboard() {
         academicYear: '',
         githubLink: '',
         publishedLink: '',
-        reportFile: null,
+        reportLink: '', // Reset reportLink instead of reportFile
       });
     } catch (error) {
       console.error('Error uploading project:', error);
@@ -198,24 +198,27 @@ function AdminDashboard() {
   const handleStudentsUpload = async (e) => {
     e.preventDefault();
     if (!studentsFile) {
-      alert('Please select a CSV file with student roll numbers');
+      alert('Please select a CSV file with student roll numbers and emails');
       return;
     }
 
     setIsUserUploading(true);
     const data = new FormData();
-    data.append('studentsFile', studentsFile);
+    data.append('file', studentsFile); // Change 'studentsFile' to 'file' to match backend expectation
 
     try {
       const response = await axios.post(`${API_URL}/admin/upload-students`, data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+        }
       });
       setUserUploadResults(response.data);
       alert('Students uploaded successfully!');
       setStudentsFile(null);
     } catch (error) {
       console.error('Error uploading students:', error);
-      alert('Failed to upload students: ' + (error.response?.data?.message || error.message));
+      const errorMessage = error.response?.data?.message || error.message;
+      alert('Failed to upload students: ' + errorMessage);
     } finally {
       setIsUserUploading(false);
     }
@@ -230,12 +233,12 @@ function AdminDashboard() {
 
     setIsUserUploading(true);
     const data = new FormData();
-    data.append('facultyFile', facultyFile);
+    data.append('file', facultyFile); // Changed from 'facultyFile' to 'file'
 
     try {
       const response = await axios.post(`${API_URL}/admin/upload-faculty`, data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
       setUserUploadResults(response.data);
       alert('Faculty uploaded successfully!');
       setFacultyFile(null);
@@ -274,13 +277,16 @@ function AdminDashboard() {
   const downloadStudentsTemplate = () => {
     const template = [
       {
-        'rollNo': '2023BCS001'
+        'rollNo': '2023BCS001',
+        'email': 'student1@cbit.ac.in'
       },
       {
-        'rollNo': '2023BCS002'
+        'rollNo': '2023BCS002',
+        'email': 'student2@cbit.ac.in'
       },
       {
-        'rollNo': '2023BCS003'
+        'rollNo': '2023BCS003',
+        'email': 'student3@cbit.ac.in'
       }
     ];
 
@@ -291,30 +297,27 @@ function AdminDashboard() {
   };
 
   const downloadFacultyTemplate = () => {
-    const template = [
-      {
-        'email': 'faculty1@cbit.ac.in'
-      },
-      {
-        'email': 'faculty2@cbit.ac.in'
-      },
-      {
-        'email': 'faculty3@cbit.ac.in'
-      }
-    ];
-
-    const ws = xlsx.utils.json_to_sheet(template);
-    const wb = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(wb, ws, 'Faculty');
-    xlsx.writeFile(wb, 'faculty-template.csv');
+    // Create CSV content directly instead of using xlsx
+    const csvContent = 'email\nfaculty1@cbit.ac.in\nfaculty2@cbit.ac.in\nfaculty3@cbit.ac.in';
+    
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'faculty-template.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   return (
     <div className="admin-dashboard">
       <header className="admin-header">
         <div className="admin-header-content">
-          <h1>🎯 Admin Dashboard</h1>
-          <p>Manage student projects and users</p>
+          <h1>Admin Dashboard</h1>
+          <p>Welcome back, {localStorage.getItem("adminId") || "Admin"}</p>
         </div>
       </header>
 
@@ -482,11 +485,13 @@ function AdminDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label>Upload Report (PDF) *</label>
+                  <label>Report Link (Google Drive / URL) *</label>
                   <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange}
+                    type="url"
+                    name="reportLink"
+                    value={formData.reportLink}
+                    onChange={handleInputChange}
+                    placeholder="https://drive.google.com/your-report-link"
                     required
                   />
                 </div>
@@ -520,7 +525,7 @@ function AdminDashboard() {
                   className="download-template-btn"
                   onClick={downloadTemplate}
                 >
-                  📥 Download Template
+                  Download Template
                 </button>
               </div>
 
@@ -576,7 +581,7 @@ function AdminDashboard() {
                     <h4>Instructions:</h4>
                     <ul>
                       <li>Download the student template CSV file</li>
-                      <li>Add student roll numbers in the CSV file</li>
+                      <li>Add student roll numbers and their email addresses in the CSV file (columns: rollNo, email)</li>
                       <li>Default password will be: rollNo + "P" (e.g., 2023BCS001P)</li>
                       <li>Students will have access disabled by default</li>
                       <li>Upload the CSV file to add students</li>
@@ -586,13 +591,13 @@ function AdminDashboard() {
                       className="download-template-btn"
                       onClick={downloadStudentsTemplate}
                     >
-                      📥 Download Students Template
+                      Download Students Template
                     </button>
                   </div>
 
                   <form onSubmit={handleStudentsUpload} className="user-upload-form">
                     <div className="form-group">
-                      <label>Upload Students CSV *</label>
+                      <label>Upload Students CSV (columns: rollNo, email) *</label>
                       <input
                         type="file"
                         accept=".csv"
@@ -627,7 +632,7 @@ function AdminDashboard() {
                       className="download-template-btn"
                       onClick={downloadFacultyTemplate}
                     >
-                      📥 Download Faculty Template
+                      Download Faculty Template
                     </button>
                   </div>
 
