@@ -6,7 +6,7 @@ export const sendResetEmail = async (email, token, identifier, userType = "stude
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     // Base frontend URL
-    const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const baseUrl = "https://projectvault-cbit.onrender.com";
 
     // ✅ Generate correct reset path based on userType
     const resetPath =
