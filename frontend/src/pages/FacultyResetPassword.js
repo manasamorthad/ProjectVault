@@ -67,7 +67,7 @@ function FacultyResetPassword() {
 
     try {
       // 🟢 Correct endpoint for faculty
-      const res = await axios.post(`${API_URL}/faculty/auth/reset-password`, {
+      const res = await axios.post(`${API_URL}/faculty/reset-password`, {
         token,
         newPassword,
       });

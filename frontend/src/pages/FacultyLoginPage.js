@@ -37,7 +37,7 @@ function FacultyLoginPage() {
     setMessage("");
 
     try {
-      const res = await axios.post(`${API_URL}/faculty/auth/forgot-password`, {
+      const res = await axios.post(`${API_URL}/faculty/forgot-password`, {
         email: forgotEmail,
       });
       setMessage(res.data.message || "Password reset email sent successfully!");
