@@ -255,4 +255,9 @@ router.post("/upload-faculty", upload.single("file"), async (req, res) => {
   }
 });
 
+// Admin login route
+router.post('/login', async (req, res) => {
+  // ...your login logic...
+});
+
 export default router;

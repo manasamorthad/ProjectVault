@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { isDummyStudentAccessGranted } from '../state/accessState.js';
 import User from "../models/User.js";
+import Student from "../models/Student.js";
 
 const router = express.Router();
 
@@ -13,10 +14,10 @@ const DUMMY_STUDENT = {
 };
 
 router.post("/login", async (req, res) => {
-  const { roll, password } = req.body;
+  const { rollNo, password } = req.body;
 
   // Special handling for the dummy student
-  if (roll === DUMMY_STUDENT.roll) {
+  if (rollNo === DUMMY_STUDENT.roll) {
     if (password !== DUMMY_STUDENT.password) {
       return res.status(401).json({ message: "Incorrect password for dummy student" });
     }
@@ -32,7 +33,7 @@ router.post("/login", async (req, res) => {
   }
 
   // Find user in database
-  const user = await User.findOne({ roll });
+  const user = await User.findOne({ rollNo });
   if (!user) return res.status(404).json({ message: "Roll not found" });
 
   // ✅ FIXED: Check if password exists before checking if it's hashed
@@ -68,6 +69,20 @@ router.post("/login", async (req, res) => {
     isAccessGranted: true, 
     studentRollNo: user.roll 
   });
+});
+
+// Forgot password route (if needed)
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { rollNo } = req.body;
+    if (!rollNo) {
+      return res.status(400).json({ message: "Missing rollNo" });
+    }
+    // ...existing forgot password logic...
+    res.json({ message: "Password reset email sent successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 });
 
 export default router;

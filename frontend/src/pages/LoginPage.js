@@ -21,15 +21,11 @@ function LoginPage() {
     setMessage("");
 
     try {
-      // Make sure the endpoint matches your backend route
-      const response = await axios.post(`${API_URL}/admin/login`, {
-        email: roll,
-        password
-      });
+      const res = await axios.post(`${API_URL}/login`, { rollNo: roll, password });
 
-      const token = response.data?.token;
-      const studentRollNo = response.data?.studentRollNo || roll;
-      const isAccessGranted = response.data?.isAccessGranted ?? false;
+      const token = res.data?.token;
+      const studentRollNo = res.data?.studentRollNo || roll;
+      const isAccessGranted = res.data?.isAccessGranted ?? false;
 
       if (!token) {
         throw new Error("No token received from server");
