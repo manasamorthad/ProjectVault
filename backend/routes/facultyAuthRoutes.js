@@ -1,0 +1,113 @@
+import express from "express";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import Faculty from "../models/Faculty.js";
+import { sendResetEmail } from "../utils/emailService.js"; // You can reuse your existing email utility
+
+const router = express.Router();
+
+/**
+ * 🔹 Route: POST /faculty/forgot-password
+ * 🔹 Description: Sends password reset email to faculty if email exists
+ */
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log("🔔 Faculty forgot password request for:", email);
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // Find faculty by email
+    const faculty = await Faculty.findOne({ email });
+
+    if (!faculty) {
+      return res.status(404).json({ message: "No faculty found with this email" });
+    }
+
+    // Generate reset token and expiration
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+    // Attach token fields to the Faculty schema if not already present
+    faculty.resetPasswordToken = resetToken;
+    faculty.resetPasswordExpires = resetPasswordExpires;
+    await faculty.save();
+
+    console.log(`📧 Sending faculty reset email to: ${faculty.email}`);
+
+    // Send password reset email
+await sendResetEmail(faculty.email, resetToken, faculty.email, "faculty");
+
+    res.json({
+      message: "Password reset email sent successfully to the registered faculty email.",
+      emailSent: true,
+    });
+
+  } catch (error) {
+    console.error("❌ Faculty forgot password error:", error);
+    res.status(500).json({
+      message: error.message || "Server error. Please try again later.",
+    });
+  }
+});
+
+/**
+ * 🔹 Route: POST /faculty/reset-password
+ * 🔹 Description: Resets faculty password using valid token
+ */
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    console.log("🔄 Faculty reset password request received");
+    console.log("📋 Token:", token ? "Present" : "Missing");
+    console.log("📋 Password length:", newPassword?.length || 0);
+
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        message: "Reset token and new password are required.",
+      });
+    }
+
+    // Find faculty by reset token and verify expiration
+    const faculty = await Faculty.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    console.log("👨‍🏫 Faculty found:", faculty ? `Yes (${faculty.email})` : "No");
+
+    if (!faculty) {
+      return res.status(400).json({
+        message: "Invalid or expired reset token. Please request a new password reset.",
+      });
+    }
+
+    // Hash and update the new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    faculty.password = hashedPassword;
+    faculty.resetPasswordToken = undefined;
+    faculty.resetPasswordExpires = undefined;
+
+    await faculty.save();
+
+    console.log(`✅ Faculty password reset successful for: ${faculty.email}`);
+
+    res.json({
+      message: "Password reset successful! You can now login with your new password.",
+      success: true,
+    });
+
+  } catch (error) {
+    console.error("❌ Faculty reset password error:", error);
+    res.status(500).json({
+      message: error.message || "Server error during password reset. Please try again.",
+    });
+  }
+});
+
+export default router;

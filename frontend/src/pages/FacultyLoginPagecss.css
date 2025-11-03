@@ -1,0 +1,128 @@
+/* === Faculty Login Page === */
+
+.faculty-login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f3f5f8 0%, #e2e6ea 100%);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  padding: 1rem;
+}
+
+.faculty-login-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.faculty-login-header h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1d3557;
+  letter-spacing: 1px;
+  margin-bottom: 0.3rem;
+}
+
+.faculty-login-header p {
+  font-size: 1.2rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.faculty-login-box {
+  background: #ffffff;
+  padding: 2.5rem;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.faculty-login-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+}
+
+.faculty-login-box h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #1d3557;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.faculty-login-form input,
+.faculty-forgot-form input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
+}
+
+.faculty-login-form input:focus,
+.faculty-forgot-form input:focus {
+  border-color: #457b9d;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(69, 123, 157, 0.2);
+  outline: none;
+}
+
+.faculty-login-form button,
+.faculty-forgot-form button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #1d3557;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.faculty-login-form button:hover,
+.faculty-forgot-form button:hover {
+  background-color: #264673;
+}
+
+.faculty-forgot-link {
+  display: block;
+  text-align: center;
+  margin-top: 1rem;
+  color: #457b9d;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.faculty-forgot-link:hover {
+  color: #1d3557;
+}
+
+.faculty-message {
+  margin-top: 1rem;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.faculty-message.error {
+  background-color: #fdecea;
+  color: #b91c1c;
+  border: 1px solid #f5c6cb;
+}
+
+.faculty-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}

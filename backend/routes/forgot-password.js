@@ -40,7 +40,7 @@ router.post("/forgot-password", async (req, res) => {
     console.log(`📧 Sending reset email to: ${user.email}`);
 
     // Send email via SendGrid
-    await sendResetEmail(user.email, resetToken, user.roll);
+await sendResetEmail(user.email, resetToken, user.roll, "student");
 
     res.json({ 
       message: "Password reset email sent successfully to your college email",

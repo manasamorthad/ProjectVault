@@ -7,7 +7,7 @@ import fs from 'fs';
 
 const router = express.Router();
 
-// Configure multer for file uploads
+// Multer configuration for PDF uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = 'uploads/';
@@ -21,9 +21,10 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
+<<<<<<< Updated upstream
     if (file.mimetype === 'application/pdf' || 
         file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
         file.mimetype === 'application/vnd.ms-excel') {
@@ -76,12 +77,31 @@ router.post('/', upload.single('reportFile'), async (req, res) => {
       academicYear,
       githubLink,
       publishedLink
+=======
+    if (file.mimetype === 'application/pdf') cb(null, true);
+    else cb(new Error('Only PDF files are allowed'), false);
+  }
+});
+
+// POST /api/projects - Upload new project
+router.post('/', upload.single('reportFile'), async (req, res) => {
+  try {
+    let { 
+      projectName, projectType, description, domain, studentName, 
+      email, rollNo, branch, academicYear, githubLink, publishedLink
+>>>>>>> Stashed changes
     } = req.body;
+
+    // Map frontend 'mini' values to backend enum
+    if (projectType === 'mini') projectType = 'mini-I';
+    if (projectType === 'mini-II') projectType = 'mini-II';
+    if (projectType === 'major') projectType = 'major';
 
     if (!req.file) {
       return res.status(400).json({ message: 'PDF file is required' });
     }
 
+<<<<<<< Updated upstream
     // Check if student already uploaded this project type
     const existingProject = await Project.findOne({ 
       rollNo, 
@@ -92,6 +112,11 @@ router.post('/', upload.single('reportFile'), async (req, res) => {
       return res.status(400).json({ 
         message: `You have already uploaded a ${projectType} project` 
       });
+=======
+    // Validate required fields
+    if (!projectName || !projectType || !description || !domain || !studentName || !email || !rollNo || !branch || !academicYear) {
+      return res.status(400).json({ message: 'All required fields must be filled' });
+>>>>>>> Stashed changes
     }
 
     const newProject = new Project({
@@ -106,11 +131,14 @@ router.post('/', upload.single('reportFile'), async (req, res) => {
       academicYear,
       githubLink: githubLink || '',
       publishedLink: publishedLink || '',
+<<<<<<< Updated upstream
       reportFile: req.file.filename,
       uploadedByAdmin: req.body.uploadedByAdmin === 'true'
+=======
+      reportFile: req.file.filename
+>>>>>>> Stashed changes
     });
 
-    console.log('New project to save:', newProject);
     await newProject.save();
     res.status(201).json({ message: 'Project uploaded successfully' });
   } catch (error) {
@@ -220,19 +248,12 @@ router.get('/', async (req, res) => {
   try {
     const { type, search, academicYear, branch, domain, sort } = req.query;
     
-    // Build filter object
     let filter = {};
-    
-    if (type && type !== 'all') {
-      filter.projectType = type;
-    }
-    
-    if (academicYear && academicYear !== 'all') {
-      filter.academicYear = academicYear;
-    }
+    if (type && type !== 'all') filter.projectType = type;
+    if (academicYear && academicYear !== 'all') filter.academicYear = academicYear;
+    if (domain && domain !== 'all') filter.domain = domain;
     
     if (branch && branch !== 'all') {
-      // Map short form branch back to full branch name for filtering
       const branchMapping = {
         'CIVIL': 'B.E- CIVIL ENGINEERING',
         'CSE': 'B.E- COMPUTER SCIENCE AND ENGG.',
@@ -247,21 +268,9 @@ router.get('/', async (req, res) => {
         'IOT-CS': 'B.E- INTERNET OF THINGS AND CYBER SECURITY',
         'AIML': 'B.E- ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING'
       };
-      
-      // Use the mapping to get the full branch name
-      const fullBranchName = branchMapping[branch];
-      if (fullBranchName) {
-        filter.branch = fullBranchName;
-      } else {
-        // If no mapping found, use the original value (fallback)
-        filter.branch = branch;
-      }
+      filter.branch = branchMapping[branch] || branch;
     }
-    
-    if (domain && domain !== 'all') {
-      filter.domain = domain;
-    }
-    
+
     if (search) {
       filter.$or = [
         { projectName: { $regex: search, $options: 'i' } },
@@ -271,6 +280,7 @@ router.get('/', async (req, res) => {
       ];
     }
 
+<<<<<<< Updated upstream
     console.log('Applied filters:', filter);
 
     // Build sort object
@@ -282,10 +292,14 @@ router.get('/', async (req, res) => {
     } else {
       sortOption = { uploadDate: -1 };
     }
+=======
+    let sortOption = { uploadDate: -1 };
+    if (sort === 'asc') sortOption = { academicYear: 1 };
+    if (sort === 'desc') sortOption = { academicYear: -1 };
+>>>>>>> Stashed changes
 
     const projects = await Project.find(filter).sort(sortOption);
-    
-    // Convert full branch names to short forms in response
+
     const shortFormMapping = {
       'B.E- CIVIL ENGINEERING': 'CIVIL',
       'B.E- COMPUTER SCIENCE AND ENGG.': 'CSE',
@@ -300,24 +314,48 @@ router.get('/', async (req, res) => {
       'B.E- INTERNET OF THINGS AND CYBER SECURITY': 'IOT-CS',
       'B.E- ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING': 'AIML'
     };
-    
-    const projectsWithShortBranches = projects.map(project => ({
-      ...project._doc,
-      branchShort: shortFormMapping[project.branch] || project.branch
+
+    const projectsWithShortBranches = projects.map(p => ({
+      ...p._doc,
+      branchShort: shortFormMapping[p.branch] || p.branch
     }));
 
+<<<<<<< Updated upstream
     console.log(`Found ${projectsWithShortBranches.length} projects after filtering`);
     
+=======
+>>>>>>> Stashed changes
     res.json(projectsWithShortBranches);
   } catch (error) {
-    console.error('Error fetching projects:', error);
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// GET /api/download/:filename - Download report file
+// GET /api/projects/status/:rollNo - Check submission status
+router.get('/status/:rollNo', async (req, res) => {
+  try {
+    const { rollNo } = req.params;
+    if (!rollNo) return res.status(400).json({ message: 'Roll number is required' });
+
+    const submittedProjects = await Project.find({ rollNo }).select('projectType -_id');
+    const submittedTypes = new Set(submittedProjects.map(p => p.projectType));
+    const status = {
+      'mini-I': submittedTypes.has('mini-I'),
+      'mini-II': submittedTypes.has('mini-II'),
+      'major': submittedTypes.has('major'),
+    };
+    res.json(status);
+  } catch (error) {
+    console.error('Error fetching project status:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/projects/download/:filename - Download report
 router.get('/download/:filename', (req, res) => {
   try {
+<<<<<<< Updated upstream
     const filename = req.params.filename;
     
     // Check if it's a Google Drive link (starts with http)
@@ -331,14 +369,14 @@ router.get('/download/:filename', (req, res) => {
       return res.status(404).json({ message: 'File not found' });
     }
     
+=======
+    const { filename } = req.params;
+    const filePath = path.join(process.cwd(), 'uploads', filename);
+>>>>>>> Stashed changes
     res.download(filePath, (err) => {
-      if (err) {
-        console.error('Error downloading file:', err);
-        res.status(404).json({ message: 'File not found' });
-      }
+      if (err) res.status(404).json({ message: 'File not found' });
     });
   } catch (error) {
-    console.error('Error in download route:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

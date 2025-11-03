@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "./LoginPage.css"; // Reuse login styles
+import "./FacultyLoginPagecss.css";
 import { useNavigate } from "react-router-dom";
 
 function FacultyLoginPage() {
@@ -8,55 +8,119 @@ function FacultyLoginPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage("");
 
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/faculty/login`, {
-        email,
-        password
-      });
+      const res = await axios.post(`${API_URL}/faculty/login`, { email, password });
       localStorage.setItem("facultyToken", res.data.token);
       navigate("/faculty-dashboard");
     } catch (err) {
-      setMessage(err.response?.data?.message || "Login failed");
+      setMessage(err.response?.data?.message || "Invalid credentials. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setIsSending(true);
+    setMessage("");
+
+    try {
+      const res = await axios.post(`${API_URL}/faculty/auth/forgot-password`, {
+        email: forgotEmail,
+      });
+      setMessage(res.data.message || "Password reset email sent successfully!");
+      setShowForgotPassword(false);
+      setForgotEmail("");
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Failed to send reset email. Please try again.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
-    <div className="login-container">
-        <div className="login-title">
-            <h1>ProjectVault</h1>
-            <p>Faculty Administration</p>
-        </div>
-      <div className="login-box">
-        <div className="login-header">
-          <h2>Faculty Login</h2>
-        </div>
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className={`form-group ${email ? 'floating' : ''}`}>
-            <input type="email" className="form-input" placeholder="" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <label className="form-label">Email</label>
+    <div className="faculty-login-container">
+      <div className="faculty-login-header">
+        <h1>ProjectVault</h1>
+        <p>Faculty Administration Portal</p>
+      </div>
+
+      <div className="faculty-login-box">
+        <h2>{showForgotPassword ? "Reset Password" : "Faculty Login"}</h2>
+
+        {!showForgotPassword ? (
+          <form onSubmit={handleLogin} className="faculty-login-form">
+            <input
+              type="email"
+              placeholder="Faculty Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Login"}
+            </button>
+            <span
+              className="faculty-forgot-link"
+              onClick={() => setShowForgotPassword(true)}
+            >
+              Forgot Password?
+            </span>
+          </form>
+        ) : (
+          <form onSubmit={handleForgotPassword} className="faculty-forgot-form">
+            <input
+              type="email"
+              placeholder="Enter your registered email"
+              value={forgotEmail}
+              onChange={(e) => setForgotEmail(e.target.value)}
+              required
+            />
+            <button type="submit" disabled={isSending}>
+              {isSending ? "Sending..." : "Send Reset Link"}
+            </button>
+            <span
+              className="faculty-forgot-link"
+              onClick={() => setShowForgotPassword(false)}
+            >
+              Back to Login
+            </span>
+          </form>
+        )}
+
+        {message && (
+          <div
+            className={`faculty-message ${
+              message.toLowerCase().includes("success")
+                ? "success"
+                : "error"
+            }`}
+          >
+            {message}
           </div>
-          <div className={`form-group ${password ? 'floating' : ''}`}>
-            <input type="password" className="form-input" placeholder="" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            <label className="form-label">Password</label>
-          </div>
-          <button type="submit" className={`login-button ${isLoading ? 'loading' : ''}`} disabled={isLoading}>
-            {isLoading ? '' : 'Login to Dashboard'}
-          </button>
-        </form>
-        {message && <div className="message error">{message}</div>}
+        )}
       </div>
     </div>
   );
 }
 
 export default FacultyLoginPage;
-
