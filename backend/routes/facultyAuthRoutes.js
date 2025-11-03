@@ -38,7 +38,7 @@ router.post("/forgot-password", async (req, res) => {
     console.log(`📧 Sending faculty reset email to: ${faculty.email}`);
 
     // Send password reset email
-await sendResetEmail(faculty.email, resetToken, faculty.email, "faculty");
+    await sendResetEmail(faculty.email, resetToken, faculty.email, "faculty");
 
     res.json({
       message: "Password reset email sent successfully to the registered faculty email.",
@@ -54,59 +54,34 @@ await sendResetEmail(faculty.email, resetToken, faculty.email, "faculty");
 });
 
 /**
- * 🔹 Route: POST /faculty/reset-password
+ * 🔹 Route: POST /faculty/auth/reset-password
  * 🔹 Description: Resets faculty password using valid token
  */
-router.post("/reset-password", async (req, res) => {
+router.post('/auth/reset-password', async (req, res) => {
   try {
     const { token, newPassword } = req.body;
-
-    console.log("🔄 Faculty reset password request received");
-    console.log("📋 Token:", token ? "Present" : "Missing");
-    console.log("📋 Password length:", newPassword?.length || 0);
-
     if (!token || !newPassword) {
-      return res.status(400).json({
-        message: "Reset token and new password are required.",
-      });
+      return res.status(400).json({ message: "Missing token or new password" });
     }
 
-    // Find faculty by reset token and verify expiration
+    // Find faculty by reset token and check expiry
     const faculty = await Faculty.findOne({
       resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() },
+      resetPasswordExpires: { $gt: Date.now() }
     });
-
-    console.log("👨‍🏫 Faculty found:", faculty ? `Yes (${faculty.email})` : "No");
 
     if (!faculty) {
-      return res.status(400).json({
-        message: "Invalid or expired reset token. Please request a new password reset.",
-      });
+      return res.status(400).json({ message: "Invalid or expired token" });
     }
 
-    // Hash and update the new password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-    faculty.password = hashedPassword;
+    faculty.password = await bcrypt.hash(newPassword, 10);
     faculty.resetPasswordToken = undefined;
     faculty.resetPasswordExpires = undefined;
-
     await faculty.save();
 
-    console.log(`✅ Faculty password reset successful for: ${faculty.email}`);
-
-    res.json({
-      message: "Password reset successful! You can now login with your new password.",
-      success: true,
-    });
-
+    res.json({ message: "Password reset successfully!" });
   } catch (error) {
-    console.error("❌ Faculty reset password error:", error);
-    res.status(500).json({
-      message: error.message || "Server error during password reset. Please try again.",
-    });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
