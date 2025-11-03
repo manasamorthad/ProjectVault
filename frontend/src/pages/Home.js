@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import "./Home.css";
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://projectvault-2.onrender.com';
 
 // Programme codes mapping
 const PROGRAMME_CODES = {
