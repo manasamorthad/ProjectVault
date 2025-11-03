@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as xlsx from 'xlsx';
 import './AdminDashboard.css';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://projectvault-2.onrender.com/api';
 
 // Programme codes mapping
 const PROGRAMME_CODES = {

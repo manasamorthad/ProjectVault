@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './FacultyDashboard.css';
 
+const API_URL = 'https://projectvault-2.onrender.com/api';
+
 function FacultyDashboard() {
   const [departmentAccess, setDepartmentAccess] = useState({});
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ function FacultyDashboard() {
 
   const fetchDepartmentAccess = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/faculty/department-access`,
+      const res = await axios.get(`${API_URL}/faculty/department-access`,
         getAuthHeaders());
       setDepartmentAccess(res.data);
       setLoading(false);
@@ -33,7 +35,7 @@ function FacultyDashboard() {
 
   const handleToggleAccess = async (department) => {
     try {
-      const res = await axios.put(`${process.env.REACT_APP_API_URL}/faculty/department-access/${department}`
+      const res = await axios.put(`${API_URL}/faculty/department-access/${department}`
         , {}, getAuthHeaders()
       );
       setDepartmentAccess(prev => ({
