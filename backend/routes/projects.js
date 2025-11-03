@@ -17,6 +17,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// Use memory storage for parsing form fields only
+const uploadFields = multer().none();
+
 // List projects with optional filters
 router.get('/', async (req, res) => {
   try {
@@ -40,7 +43,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create project - accepts reportLink (form field) or file upload 'reportFile'
-router.post('/', async (req, res) => {
+router.post('/', uploadFields, async (req, res) => {
   try {
     // Log the incoming request body for debugging
     console.log('Project upload request body:', req.body);
