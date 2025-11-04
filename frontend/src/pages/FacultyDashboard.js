@@ -3,6 +3,7 @@ import axios from 'axios';
 import './FacultyDashboard.css';
 
 const API_URL = 'https://projectvault-2.onrender.com/api';
+//const API_URL = 'http://localhost:5000/api';
 
 function FacultyDashboard() {
   const [departmentAccess, setDepartmentAccess] = useState({});

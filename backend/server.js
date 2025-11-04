@@ -38,7 +38,7 @@ mongoose.connect(process.env.MONGO_URI)
 // CORS configuration
 const allowedOrigins = [
   'https://projectvault-cbit.onrender.com'
-  // 'http://localhost:3000'
+  //'http://localhost:3000'
 ];
 
 // Dynamic CORS headers for every request

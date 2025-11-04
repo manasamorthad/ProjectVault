@@ -3,6 +3,7 @@ import axios from 'axios';
 import "./Home.css";
 
 const API_URL = 'https://projectvault-2.onrender.com/api';
+//const API_URL = 'http://localhost:5000/api';
 
 // Programme codes mapping
 const PROGRAMME_CODES = {
@@ -109,6 +110,18 @@ function Home() {
     publishedLink: '',
     reportLink: '',
   });
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  
+  const handleProjectNameClick = (project) => {
+    setSelectedProject(project);
+    setShowProjectModal(true);
+  };
+
+  const closeProjectModal = () => {
+    setShowProjectModal(false);
+    setSelectedProject(null);
+  };
 
   // Extract branch from roll number
   const extractBranchFromRollNo = (rollNo) => {
@@ -234,48 +247,99 @@ function Home() {
   };
 
   // Fetch projects from API
-  const fetchProjects = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API_URL}/projects`, {
-        params: { 
-          type: filterType !== 'all' ? filterType : undefined,
-          search: searchTerm || undefined,
-          branch: filterBranch !== 'all' ? filterBranch : undefined,
-          domain: filterDomain !== 'all' ? filterDomain : undefined,
-        },
-      });
-      
-      let filteredProjects = response.data.map(project => ({
-        ...project,
-        academicYear: getYearFromRollNo(project.rollNo) || project.academicYear
-      }));
+// Fetch projects from API
+const fetchProjects = useCallback(async () => {
+  try {
+    const response = await axios.get(`${API_URL}/projects`, {
+      params: { 
+        type: filterType !== 'all' ? filterType : undefined,
+        search: searchTerm || undefined,
+        // Remove branch from backend params - we'll filter on frontend
+        domain: filterDomain !== 'all' ? filterDomain : undefined,
+      },
+    });
+    
+    let filteredProjects = response.data.map(project => ({
+      ...project,
+      academicYear: getYearFromRollNo(project.rollNo) || project.academicYear,
+      // Ensure branch data is consistent
+      branchShort: project.branchShort || BRANCH_SHORT_FORMS[project.branch] || getBranchShortForm(project.branch)
+    }));
 
-      // Filter by academic year if selected
-      if (filterAcademicYear !== 'all') {
-        filteredProjects = filteredProjects.filter(project => 
-          project.academicYear === filterAcademicYear
-        );
-      }
+    // Debug: Log all unique branches from the API
+    const uniqueBranches = [...new Set(response.data.map(p => p.branch))];
+    console.log('Available branches from API:', uniqueBranches);
+    console.log('Current filter branch:', filterBranch);
 
-      // Sort by academic year if selected
-      if (sortAcademicYear !== 'none') {
-        filteredProjects.sort((a, b) => {
-          const yearA = parseInt(a.academicYear?.split('-')[0]) || 0;
-          const yearB = parseInt(b.academicYear?.split('-')[0]) || 0;
-          return sortAcademicYear === 'asc' ? yearA - yearB : yearB - yearA;
-        });
-      }
-
-      setProjects(filteredProjects);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      if (error.response) {
-        console.error('Backend response:', error.response.data);
-      }
-      alert(formatAxiosError(error));
-      setProjects([]); // keep UI consistent
+    // Filter by project type if selected
+    if (filterType !== 'all') {
+      filteredProjects = filteredProjects.filter(project => 
+        project.projectType === filterType
+      );
     }
-  }, [filterType, searchTerm, filterBranch, filterDomain, filterAcademicYear, sortAcademicYear]);
+
+    // Filter by branch if selected - FIXED VERSION
+    if (filterBranch !== 'all') {
+      filteredProjects = filteredProjects.filter(project => {
+        // Get the branch in short form for comparison
+        const projectBranchShort = project.branchShort || BRANCH_SHORT_FORMS[project.branch] || getBranchShortForm(project.branch);
+        
+        console.log('Branch comparison:', {
+          projectName: project.projectName,
+          originalBranch: project.branch,
+          computedShort: projectBranchShort,
+          filterBranch: filterBranch,
+          matches: projectBranchShort === filterBranch
+        });
+        
+        return projectBranchShort === filterBranch;
+      });
+    }
+
+    // Filter by domain if selected
+    if (filterDomain !== 'all') {
+      filteredProjects = filteredProjects.filter(project => 
+        project.domain === filterDomain
+      );
+    }
+
+    // Filter by academic year if selected
+    if (filterAcademicYear !== 'all') {
+      filteredProjects = filteredProjects.filter(project => 
+        project.academicYear === filterAcademicYear
+      );
+    }
+
+    // Search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filteredProjects = filteredProjects.filter(project =>
+        project.projectName.toLowerCase().includes(searchLower) ||
+        project.description.toLowerCase().includes(searchLower) ||
+        project.studentName.toLowerCase().includes(searchLower) ||
+        project.domain.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Sort by academic year if selected
+    if (sortAcademicYear !== 'none') {
+      filteredProjects.sort((a, b) => {
+        const yearA = parseInt(a.academicYear?.split('-')[0]) || 0;
+        const yearB = parseInt(b.academicYear?.split('-')[0]) || 0;
+        return sortAcademicYear === 'asc' ? yearA - yearB : yearB - yearA;
+      });
+    }
+
+    setProjects(filteredProjects);
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    if (error.response) {
+      console.error('Backend response:', error.response.data);
+    }
+    alert(formatAxiosError(error));
+    setProjects([]); // keep UI consistent
+  }
+}, [filterType, searchTerm, filterBranch, filterDomain, filterAcademicYear, sortAcademicYear]);
 
   useEffect(() => {
     fetchProjects();
@@ -358,7 +422,7 @@ function Home() {
       );
     }
   };
-
+  
   // helper: find a project by logged in student + type
   const findProjectByType = (type) => {
     if (!loggedInStudent) return null;
@@ -511,6 +575,36 @@ function Home() {
 
   const availableAcademicYears = getAvailableAcademicYears();
 
+  // Helper function to get short form of branch
+const getBranchShortForm = (branchName) => {
+  if (!branchName) return 'Unknown';
+  
+  // Clean the branch name
+  const cleanBranchName = branchName.trim().toUpperCase();
+  
+  // Direct mapping check with cleaned name
+  if (BRANCH_SHORT_FORMS[branchName]) {
+    return BRANCH_SHORT_FORMS[branchName];
+  }
+  
+  // Try to find a match by checking if the branch name contains any of our known branches
+  const matchedFullName = Object.keys(BRANCH_SHORT_FORMS).find(fullName => 
+    cleanBranchName.includes(fullName.toUpperCase()) || 
+    fullName.toUpperCase().includes(cleanBranchName)
+  );
+  
+  if (matchedFullName) {
+    return BRANCH_SHORT_FORMS[matchedFullName];
+  }
+  
+  // If no match found, try to match with short forms directly
+  const matchedShortForm = Object.values(BRANCH_SHORT_FORMS).find(shortForm =>
+    cleanBranchName === shortForm
+  );
+  
+  return matchedShortForm || branchName;
+};
+
   const handleLogout = () => {
     localStorage.removeItem("studentRollNo");
     window.location.href = "/";
@@ -553,6 +647,8 @@ function Home() {
                 <option value="mini-II">Mini Project II</option>
                 <option value="major">Major Project</option>
               </select>
+
+              
 
               <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)}>
                 <option value="all">All Branches</option>
@@ -655,14 +751,14 @@ function Home() {
                       <div className="form-section-title">Project Details</div>
                       <div className="form-row-three">
                         <div className="form-group">
-                          <label>Project Name *</label>
+                          <label>Project Title *</label>
                           <input
                             type="text"
                             name="projectName"
                             value={formData.projectName}
                             onChange={handleInputChange}
                             required
-                            placeholder="Enter project name"
+                            placeholder="Enter project title"
                           />
                         </div>
 
@@ -702,7 +798,7 @@ function Home() {
                       </div>
 
                       <div className="form-group">
-                        <label>Description *</label>
+                        <label>Abstract *</label>
                         <textarea
                           name="description"
                           value={formData.description}
@@ -838,7 +934,7 @@ function Home() {
                 <div className="upload-form">
                   <form onSubmit={handleSaveEdit}>
                     <div className="form-group">
-                      <label>Project Name *</label>
+                      <label>Project Title *</label>
                       <input name="projectName" value={editFormData.projectName} onChange={handleEditInputChange} required />
                     </div>
                     <div className="form-group">
@@ -849,7 +945,7 @@ function Home() {
                       </select>
                     </div>
                     <div className="form-group">
-                      <label>Description *</label>
+                      <label>Abstract *</label>
                       <textarea name="description" value={editFormData.description} onChange={handleEditInputChange} rows="4" required />
                     </div>
                     <div className="form-group">
@@ -875,6 +971,67 @@ function Home() {
             </div>
           )}
 
+          {/* Project Details Modal - MOVED INSIDE THE RETURN */}
+          {showProjectModal && selectedProject && (
+            <div className="project-modal-overlay">
+              <div className="project-modal">
+                <div className="project-modal-header">
+                  <h3>{selectedProject.projectName}</h3>
+                  <button 
+                    className="close-modal-btn"
+                    onClick={closeProjectModal}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="project-modal-content">
+                  <div className="project-details-grid">
+                    <div className="detail-item">
+                      <label>Project Type:</label>
+                      <span className={`badge ${selectedProject.projectType}`}>
+                        {selectedProject.projectType.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Domain:</label>
+                      <span>{selectedProject.domain}</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Academic Year:</label>
+                      <span>{selectedProject.academicYear}</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Branch:</label>
+                      <span>{selectedProject.branchShort || BRANCH_SHORT_FORMS[selectedProject.branch] || selectedProject.branch}</span>
+                    </div>
+                    <div className="detail-item full-width">
+                      <label>Student Information:</label>
+                      <div className="student-details">
+                        <strong>{selectedProject.studentName}</strong>
+                        <div className="email">{selectedProject.email}</div>
+                        <div className="rollno">{selectedProject.rollNo}</div>
+                      </div>
+                    </div>
+                    <div className="detail-item full-width">
+                      <label>Abstract:</label>
+                      <div className="project-description">
+                        {selectedProject.description}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="project-modal-footer">
+                  <button 
+                    className="close-btn"
+                    onClick={closeProjectModal}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="projects-table-container">
             {projects.length === 0 ? (
               <div className="no-projects">
@@ -884,13 +1041,7 @@ function Home() {
               <table className="projects-table">
                 <thead>
                   <tr>
-                    <th>Project Name</th>
-                    <th>Type</th>
-                    <th>Domain</th>
-                    <th>Description</th>
-                    <th>Student</th>
-                    <th>Branch</th>
-                    <th>Academic Year</th>
+                    <th>Project Title</th>
                     <th>Links</th>
                     <th>Actions</th>
                   </tr>
@@ -899,33 +1050,21 @@ function Home() {
                   {projects.map((project) => (
                     <tr key={project._id} className="table-row">
                       <td className="project-name-cell">
-                        <div className="project-name-content">
+                        <div 
+                          className="project-name-content clickable"
+                          onClick={() => handleProjectNameClick(project)}
+                        >
                           <strong>{project.projectName}</strong>
+                          <div className="project-brief-info">
+                            <span className={`badge ${project.projectType}`}>
+                              {project.projectType.toUpperCase()}
+                            </span>
+                            <span className="project-domain">{project.domain}</span>
+                          </div>
                         </div>
                       </td>
-                      <td>
-                        <span className={`badge ${project.projectType}`}>
-                          {project.projectType.toUpperCase()}
-                        </span>
-                      </td>
-                      <td>{project.domain}</td>
-                      <td 
-                        className="description-cell clickable"
-                        onClick={() => handleDescriptionClick(project.description)}
-                        title="Click to view full description"
-                      >
-                        <div className="description-text">{project.description}</div>
-                      </td>
-                      <td className="student-info-cell">
-                        <div><strong>{project.studentName}</strong></div>
-                        <div className="email">{project.email}</div>
-                        <div className="rollno">{project.rollNo}</div>
-                      </td>
-                      <td>{project.branchShort || BRANCH_SHORT_FORMS[project.branch] || project.branch}</td>
-                      <td>{project.academicYear}</td>
                       <td className="links-cell">
                         <div className="links-container">
-                          {/* Show GitHub Link */}
                           {project.githubLink ? (
                             <a 
                               href={project.githubLink} 
@@ -940,7 +1079,6 @@ function Home() {
                             <span className="no-link">No GitHub</span>
                           )}
                           
-                          {/* Show Published Link */}
                           {project.publishedLink ? (
                             <a 
                               href={project.publishedLink} 
@@ -957,7 +1095,6 @@ function Home() {
                         </div>
                       </td>
                       <td className="actions-cell">
-                        {/* Report link only (no server PDF download) */}
                         {project.reportLink ? (
                           <a
                             className="link-btn view-report"
@@ -985,3 +1122,6 @@ function Home() {
 }
 
 export default Home;
+
+
+

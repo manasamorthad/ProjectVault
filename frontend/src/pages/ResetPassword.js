@@ -18,6 +18,7 @@ function ResetPassword() {
 
   const token = searchParams.get("token");
   const API_URL = "https://projectvault-2.onrender.com/api";
+  //const API_URL = 'http://localhost:5000/api';
 
   useEffect(() => {
     // Check if token exists in URL
@@ -99,6 +100,7 @@ function ResetPassword() {
       // Redirect to login after 2 seconds
       setTimeout(() => {
         window.location.href = "https://projectvault-cbit.onrender.com/";
+        //window.location.href = "http://localhost:3000";
       }, 2000);
 
     } catch (err) {

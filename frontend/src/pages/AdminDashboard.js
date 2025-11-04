@@ -4,6 +4,7 @@ import * as xlsx from 'xlsx';
 import './AdminDashboard.css';
 
 const API_URL = 'https://projectvault-2.onrender.com/api';
+//const API_URL = 'http://localhost:5000/api';
 
 // Programme codes mapping
 const PROGRAMME_CODES = {
@@ -350,7 +351,7 @@ function AdminDashboard() {
               <form onSubmit={handleSingleUpload} className="admin-form">
                 <div className="form-row-three">
                   <div className="form-group">
-                    <label>Project Name *</label>
+                    <label>Project Title *</label>
                     <input
                       type="text"
                       name="projectName"
@@ -391,7 +392,7 @@ function AdminDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label>Description *</label>
+                  <label>Abstract *</label>
                   <textarea
                     name="description"
                     value={formData.description}
