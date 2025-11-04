@@ -21,6 +21,14 @@ const facultySchema = new mongoose.Schema({
   role: {
     type: String,
     default: "faculty"
+  },
+  resetPasswordToken: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null
   }
 }, { timestamps: true });
 

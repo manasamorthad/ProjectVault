@@ -17,7 +17,8 @@ function FacultyResetPassword() {
   const navigate = useNavigate();
 
   const token = searchParams.get("token");
-  const API_URL = "https://projectvault-2.onrender.com/api";
+  // Use env var fallback so frontend and other pages share same API base
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
   // ✅ Step 1: Verify token presence
   useEffect(() => {
@@ -66,12 +67,14 @@ function FacultyResetPassword() {
     setIsLoading(true);
 
     try {
+      // Debug: log token presence and masked password length
+      console.log("Reset request -> token present:", !!token, "newPassword length:", newPassword.length);
       // Correct endpoint for faculty password reset
       const res = await axios.post(`${API_URL}/faculty/auth/reset-password`, {
         token,
         newPassword,
       });
-
+      console.log("hello",token);
       setMessage("Password reset successfully! Redirecting to faculty login...");
 
       // Redirect to faculty login after short delay

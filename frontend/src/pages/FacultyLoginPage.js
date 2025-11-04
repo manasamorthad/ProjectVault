@@ -13,7 +13,8 @@ function FacultyLoginPage() {
   const [isSending, setIsSending] = useState(false);
 
   const navigate = useNavigate();
-  const API_URL = 'https://projectvault-2.onrender.com/api';
+  // Use a fallback to an env var so local development can use HTTP
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -37,7 +38,7 @@ function FacultyLoginPage() {
     setMessage("");
 
     try {
-      const res = await axios.post(`${API_URL}/faculty/forgot-password`, {
+      const res = await axios.post(`${API_URL}/faculty/auth/forgot-password`, {
         email: forgotEmail,
       });
       setMessage(res.data.message || "Password reset email sent successfully!");

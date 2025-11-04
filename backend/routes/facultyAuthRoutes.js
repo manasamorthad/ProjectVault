@@ -56,7 +56,7 @@ router.post("/forgot-password", async (req, res) => {
  * 🔹 Route: POST /api/faculty/auth/reset-password
  * 🔹 Description: Resets faculty password using valid token
  */
-router.post('/auth/reset-password', async (req, res) => {
+router.post('/reset-password', async (req, res) => {
   try {
     const { token, newPassword } = req.body;
     
@@ -82,7 +82,7 @@ router.post('/auth/reset-password', async (req, res) => {
     console.log("✅ Valid token found for faculty:", faculty.email);
 
     // Hash new password and clear reset fields
-    faculty.password = await bcrypt.hash(newPassword, 10);
+        faculty.password = newPassword;
     faculty.resetPasswordToken = undefined;
     faculty.resetPasswordExpires = undefined;
     await faculty.save();
